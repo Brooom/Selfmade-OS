@@ -1,7 +1,7 @@
-CC      = arm-none-eabi-gcc
-OBJCOPY = arm-none-eabi-objcopy
+CC      = aarch64-elf-gcc
+OBJCOPY = aarch64-elf-objcopy
 
-CFLAGS  = -mcpu=cortex-a7 -ffreestanding
+CFLAGS  = -ffreestanding
 LDFLAGS = -nostdlib -nostartfiles -T linker.ld
 
 OBJS = boot.o kernel.o uart.o

@@ -1,4 +1,4 @@
-volatile unsigned int * const UART0DR = (unsigned int *)0x101f1000;
+volatile unsigned int * const UART0DR = (unsigned int *)0x9000000;
  
 void put_uart(const char *s) {
     while(*s != '\0') { /* Loop until end of string */
