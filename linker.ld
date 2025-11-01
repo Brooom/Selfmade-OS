@@ -7,7 +7,13 @@ SECTIONS {
     .data : { *(.data) } /* Same as with the text section with the data section */
     .bss  : { *(.bss) }
     . = ALIGN(16); /* Rounds the location counter up */
+    stack_bottom = .;
     . = . + 0x10000; /* Increases the location counter by 4096 bytes. Such that the stack has that much space since the stack grows downwards. */
     /* Note: Every .blablabla increases the location counter */
     stack_top = .;
+    . = . + 1;
+    . = ALIGN(16);
+    heap_start = .;
+    . = . + 0x10000;
+    heap_end = .;
 }

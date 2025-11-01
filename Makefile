@@ -1,21 +1,27 @@
 CC      = aarch64-elf-gcc
 OBJCOPY = aarch64-elf-objcopy
 
-CFLAGS  = -ffreestanding
+CFLAGS  = -ffreestanding -mgeneral-regs-only
 LDFLAGS = -nostdlib -nostartfiles -T linker.ld
 
-OBJS = boot.o kernel.o uart.o
+OBJS = boot.o kernel.o uart.o virtio_pci.o allocator.o
 
 all: kernel.img
 
 boot.o: boot.S
 	$(CC) $(CFLAGS) -c $< -o $@
 
-kernel.o: kernel.c uart.h
+kernel.o: kernel.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 uart.o: uart.c uart.h
 	$(CC) $(CFLAGS) -c $< -o $@
+
+virtio_pci.o: virtio_pci.c virtio_pci.h 
+	$(CC) $(CFLAGS) -c $< -o $@
+
+allocator.o: allocator.c allocator.h
+	$(CC) $(CFLAGS) -c $< -o $@ 
 
 kernel.elf: linker.ld $(OBJS)
 	$(CC) $(LDFLAGS) $(OBJS) -o $@
