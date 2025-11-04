@@ -4,20 +4,27 @@ OBJCOPY = aarch64-elf-objcopy
 CFLAGS  = -ffreestanding -mgeneral-regs-only
 LDFLAGS = -nostdlib -nostartfiles -T linker.ld
 
-OBJS = boot.o kernel.o uart.o virtio_pci.o allocator.o
+CXX = aarch64-elf-g++
+
+CXXFLAGS = $(CFLAGS)
+
+OBJS = boot.o kernel.o uart.o allocator.o virtio_gpu_driver.o pci_driver.o
 
 all: kernel.img
 
 boot.o: boot.S
 	$(CC) $(CFLAGS) -c $< -o $@
 
-kernel.o: kernel.c
+kernel.o: kernel.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+virtio_gpu_driver.o: virtio_gpu_driver.cpp virtio_gpu_driver.hpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+pci_driver.o: pci_driver.c pci_driver.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 uart.o: uart.c uart.h
-	$(CC) $(CFLAGS) -c $< -o $@
-
-virtio_pci.o: virtio_pci.c virtio_pci.h 
 	$(CC) $(CFLAGS) -c $< -o $@
 
 allocator.o: allocator.c allocator.h

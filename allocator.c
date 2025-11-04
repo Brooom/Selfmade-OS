@@ -1,7 +1,6 @@
 #include "allocator.h"
 #include <stdint.h>
 #include "uart.h"
-#include "virtio_pci.h"
 #include <stddef.h>
 
 extern uint8_t heap_start[];
@@ -12,12 +11,12 @@ void init(){
 
 uint8_t* alloc(uint32_t size, uint32_t allignment){   
     put_uart("Current free:  ", 0);
-    send_value_hex(&current_free, sizeof(current_free));
+    uart_send_hex_value(&current_free, sizeof(current_free));
     current_free = (uint8_t*) allign(current_free, allignment);
     put_uart("Byte aligned:  ", 0);
-    send_value_hex(&current_free, sizeof(current_free));
+    uart_send_hex_value(&current_free, sizeof(current_free));
     put_uart("Size: ", 0);
-    send_value_hex(&size, sizeof(size));
+    uart_send_hex_value(&size, sizeof(size));
     uint8_t *start_add = current_free;
     for (uint32_t i = 0; i < size; ++i){
         current_free[i] = 0;
@@ -25,7 +24,7 @@ uint8_t* alloc(uint32_t size, uint32_t allignment){
     current_free += size;
 
     put_uart("Storage added: ", 0);
-    send_value_hex(&current_free, sizeof(current_free));
+    uart_send_hex_value(&current_free, sizeof(current_free));
     return start_add;
 }
 
