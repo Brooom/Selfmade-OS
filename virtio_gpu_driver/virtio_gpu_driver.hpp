@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include "pci_driver.h"
+#include "../pci_driver.h"
 
 
 struct virtq_desc {
@@ -47,12 +47,22 @@ struct virtq {
 
 class virtio_gpu_driver{
     public:
-        struct virtq virtq;
         struct bus_device_function bdf;
         virtio_gpu_driver();
-    
+        void init_2D_frame_buffer();
+        uint8_t* connect_resource_to_memory();
+        void set_scanout_param();
+        void transfer_to_host_2d();
+        void resource_flush();
+
     private:
+        struct virtq virtq;
+        int queue_size = 0;
+        uint16_t descriptor_index = 0;
+        volatile uint32_t *queue_notify_address;
         struct virtq construct_virtqueue(volatile struct virtio_pci_common_cfg *common_cfg);
+        virtq_desc* get_next_descriptor();
+        
 };
 
 #endif
