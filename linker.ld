@@ -2,7 +2,7 @@ ENTRY(_start)
 
 SECTIONS {
     . = 0x40000000; /* Defines at which virtual address the image is stored. */
-    .boot : { boot.o(.text) } /* Places the boot script at . */
+    .boot : { *(.boot) } /* Places the boot script at . */
     .text : { *(.text) } /* Places all the remaining text sections after the boot section. So in my case the .c files */
     .data : { *(.data) } /* Same as with the text section with the data section */
     .bss  : { *(.bss) }

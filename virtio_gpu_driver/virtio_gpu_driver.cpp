@@ -1,6 +1,7 @@
 #include "virtio_gpu_driver.hpp"
-#include "../uart.h"
+#include "kernel_logs/kernel_logger.hpp"
 #include "../allocator.h"
+#include "letters/font8x8_basic.h"
 
 struct virtio_pci_common_cfg {
     /* About the whole device. */
@@ -116,13 +117,7 @@ struct virtio_gpu_mem_entry {
 #define VIRTQ_DESC_F_WRITE 2 /* This marks a descriptor as device write-only (otherwise device read-only). */
 #define VIRTIO_GPU_MAX_SCANOUTS 16
 
-/* Rectangle (x, y, width, height) */
-struct virtio_gpu_rect {
-    uint32_t x;
-    uint32_t y;
-    uint32_t width;
-    uint32_t height;
-};
+
 
 /* Response to VIRTIO_GPU_CMD_GET_DISPLAY_INFO */
 struct virtio_gpu_resp_display_info {
@@ -188,14 +183,12 @@ virtio_gpu_driver::virtio_gpu_driver(){
     // negotiate feature bits
     common_cfg->device_feature_select = 0x0;
     uint32_t features0 = common_cfg->device_feature;
-    put_uart("Available feature0: ", 0);
-    uart_send_hex_value(&features0, sizeof(features0));
+    log("Available feature0: %x", features0);
     common_cfg->driver_feature_select = features0 & 0x0;
     common_cfg->driver_feature = 0x0;
     common_cfg->device_feature_select = 0x1;
     uint32_t features1 = common_cfg->device_feature;
-    put_uart("Available feature1: ", 0);
-    uart_send_hex_value(&features1, sizeof(features1));
+    log("Available feature1: %x", features1);
     common_cfg->driver_feature_select = features1 & 0x1;
     common_cfg->driver_feature = 0x1;
 
@@ -203,24 +196,21 @@ virtio_gpu_driver::virtio_gpu_driver(){
     // Check if everything worked properly
     uint32_t device_status = common_cfg->device_status;
     if(device_status == 0x0b){
-        put_uart("Device status is ok: ", 0);
+        log("Device status is ok");
     }
-    put_uart("Number of queues: ", 0);
-    uart_send_hex_value(&(common_cfg->num_queues), sizeof(common_cfg->num_queues));
+    log("Number of queues: %x", common_cfg->num_queues);
 
     // Initialize queues
     common_cfg->queue_select = 0;
     uint16_t max_queue_size = common_cfg->queue_size;
     common_cfg->queue_size = max_queue_size;
-    put_uart("Queue size: ", 0);
-    uart_send_hex_value(&(common_cfg->queue_size), sizeof(common_cfg->queue_size));
+    log("Queue size: %x", common_cfg->queue_size);
 
     virtq = construct_virtqueue(common_cfg);
 
     common_cfg->device_status |= 4;
     
-    put_uart("Device status after init: ", 0);
-    uart_send_hex_value(&(common_cfg->device_status), sizeof(common_cfg->device_status));
+    log("Device status after init: %x", common_cfg->device_status);
     
     // GPU specific initalizations
     volatile struct virtq_desc *d = get_next_descriptor();
@@ -249,17 +239,13 @@ virtio_gpu_driver::virtio_gpu_driver(){
     virtq_avail->ring[0]    = 0;
     virtq_avail->idx        = 1;
     volatile struct virtio_pci_notify_cap *notify_cap = (struct virtio_pci_notify_cap *) get_pci_capability(bdf, 2, 1);
-    put_uart("#########", 1);
-    uart_send_hex_value(&(notify_cap->cap.bar), sizeof(notify_cap->cap.bar));
-    put_uart("\n", 1);
-    put_uart("queue_select ", 0);
-    uart_send_hex_value(&(common_cfg->queue_select), sizeof(common_cfg->queue_select));
-    put_uart("cap offset: ", 0);
-    uart_send_hex_value(&(notify_cap->cap.offset), sizeof(notify_cap->cap.offset));
-    put_uart("common_cfg->queue_notify_off: ", 0);
-    uart_send_hex_value(&(common_cfg->queue_notify_off), sizeof(common_cfg->queue_notify_off));
-    put_uart("notify_cap->notify_off_multiplier: ", 0);
-    uart_send_hex_value(&(notify_cap->notify_off_multiplier), sizeof(notify_cap->notify_off_multiplier));
+    log("#########");
+    log("%x", notify_cap->cap.bar);
+    log("\n");
+    log("queue_select %x", common_cfg->queue_select);
+    log("cap offset: %x", notify_cap->cap.offset);
+    log("common_cfg->queue_notify_off: %x", common_cfg->queue_notify_off);
+    log("notify_cap->notify_off_multiplier: %x", notify_cap->notify_off_multiplier);
     queue_notify_address = (uint32_t*)((volatile uint8_t*)bar4 + notify_cap->cap.offset + common_cfg->queue_notify_off * notify_cap->notify_off_multiplier);
     
     *queue_notify_address = 0;
@@ -267,42 +253,35 @@ virtio_gpu_driver::virtio_gpu_driver(){
     
     volatile struct virtq_used *virtq_used = virtq.used;
     while(virtq_used->idx==0){}
-    put_uart("idx: ", 0);
-    uart_send_hex_value(&(virtq_used->idx), sizeof(virtq_used->idx));
-    put_uart("test", 1);
+    log("idx: %x", virtq_used->idx);
+    log("test");
     volatile struct virtq_used_elem *used_elem = &(virtq_used->ring[0]);
-    put_uart("id: ", 0);
-    uart_send_dec_value((int) used_elem->id);
-    put_uart("len: ", 0);
-    uart_send_dec_value((int) used_elem->len);
+    log("id: %u", (int) used_elem->id);
+    log("len: ", (int) used_elem->len);
     //*comand_register = comand_register_before;
     struct virtio_gpu_resp_display_info::virtio_gpu_display_one display_one = info->pmodes[0];
     volatile struct virtio_gpu_rect rec = display_one.r;
     
-    put_uart("x: ", 0);
-    uart_send_dec_value(rec.x);
-    put_uart("y: ", 0);
-    uart_send_dec_value(rec.y);
-    put_uart("width: ", 0);
-    uart_send_dec_value(rec.width);
-    put_uart("height: ", 0);
-    uart_send_dec_value(rec.height);
+    log("x: %u", rec.x);
+    log("y: %u", rec.y);
+    log("width: %u", rec.width);
+    log("height: ", rec.height);
 }
 
 struct virtq virtio_gpu_driver::construct_virtqueue(volatile struct virtio_pci_common_cfg *common_cfg){
     queue_size = common_cfg->queue_size;
 
-    put_uart("descriptor: ", 1);
+    log("descriptor: ");
     uint8_t* addr_descriptor_table = alloc(queue_size*16, 16);
     common_cfg->queue_desc = (uint64_t) addr_descriptor_table;
 
 
-    put_uart("driver area: ", 1);
+    log("driver area: ");
     uint8_t* addr_driver = alloc(queue_size*2+6, 2);
     common_cfg->queue_driver = (uint64_t) addr_driver;
     
 
-    put_uart("device area: ", 1);
+    log("device area: ");
     uint8_t* addr_device = alloc(queue_size*8+6, 4);
     common_cfg->queue_device = (uint64_t) addr_device;
 
@@ -355,11 +334,10 @@ void virtio_gpu_driver::init_2D_frame_buffer(){
     *queue_notify_address = 0;
     while(virtq_used->idx == used_idx){};
     if(response_gpu_2d_resource->type != VIRTIO_GPU_RESP_OK_NODATA){
-        put_uart("Wrong return typ for resource: ", 0);
-        uart_send_hex_value(&(response_gpu_2d_resource->type), sizeof(response_gpu_2d_resource->type));
+        log("Wrong return typ for resource: %x", response_gpu_2d_resource->type);
     }
     else{
-        put_uart("Created 2d resource.", 1);
+        log("Created 2d resource.");
     }
 }
 
@@ -405,6 +383,7 @@ uint8_t* virtio_gpu_driver::connect_resource_to_memory(){
     d0->flags    = VIRTQ_DESC_F_NEXT;
     d0->next     = d1_idx;
     uint8_t *memory_2d = alloc(800*1280*4, 8);
+    display = (pixelcolor *) memory_2d;
     mem_entry->addr     = (uint64_t) memory_2d;
     mem_entry->length   = 800*1280*4;
     mem_entry->padding  = 0;
@@ -426,11 +405,10 @@ uint8_t* virtio_gpu_driver::connect_resource_to_memory(){
     *queue_notify_address = 0;
     while(virtq_used->idx == used_idx){};
     if(response->type != VIRTIO_GPU_RESP_OK_NODATA){
-        put_uart("Connection of resource and memory did not work: ", 0);
-        uart_send_hex_value(&(response->type), sizeof(response->type));
+        log("Connection of resource and memory did not work: %x", response->type);
     }
     else{
-        put_uart("Connected resource and memory.", 1);
+        log("Connected resource and memory.");
     }
     return memory_2d;
 }
@@ -476,11 +454,10 @@ void virtio_gpu_driver::set_scanout_param(){
     *queue_notify_address = 0;
     while(virtq_used->idx == used_idx){};
     if(response->type != VIRTIO_GPU_RESP_OK_NODATA){
-        put_uart("Wrong return typ set scanout param: ", 0);
-        uart_send_hex_value(&(response->type), sizeof(response->type));
+        log("Wrong return typ set scanout param: %x", response->type);
     }
     else{
-        put_uart("Set scanout parameters.", 1);
+        log("Set scanout parameters.", 1);
     }
 }
 
@@ -527,11 +504,10 @@ void virtio_gpu_driver::transfer_to_host_2d(){
     *queue_notify_address = 0;
     while(virtq_used->idx == used_idx){};
     if(response->type != VIRTIO_GPU_RESP_OK_NODATA){
-        put_uart("Wrong return typ for transfer: ", 0);
-        uart_send_hex_value(&(response->type), sizeof(response->type));
+        log("Wrong return typ for transfer: ", response->type);
     }
     else{
-        put_uart("Transfer to host worked.", 1);
+        log("Transfer to host worked.");
     }
 }
 
@@ -577,10 +553,44 @@ void virtio_gpu_driver::resource_flush(){
     *queue_notify_address = 0;
     while(virtq_used->idx == used_idx){};
     if(response->type != VIRTIO_GPU_RESP_OK_NODATA){
-        put_uart("Wrong return typ for resource flush: ", 0);
-        uart_send_hex_value(&(response->type), sizeof(response->type));
+        log("Wrong return typ for resource flush: ", response->type);
     }
     else{
-        put_uart("Resource flush worked.", 1);
+        log("Resource flush worked.", 1);
+    }
+}
+
+
+void virtio_gpu_driver::draw_pixel(int x, int y, struct pixelcolor c){
+    display[y*screen_width+x] = c;
+}
+
+void virtio_gpu_driver::draw_rec(struct virtio_gpu_rect rec, struct pixelcolor c){
+    int start_pos = rec.y*screen_width+rec.x;
+    for(int i = 0; i<rec.width; ++i){
+        for(int j = 0; j<rec.height; ++j){
+            display[start_pos+i+(j*screen_width)] = c;
+        }
+    }
+}
+
+void virtio_gpu_driver::draw_letter(int x, int y, char l, struct pixelcolor c, int size){
+    const char *letter = font8x8_basic[l];
+    for(int i = 0; i<8*size; ++i){
+        for (int j = 0; j < 8*size; ++j) {
+            unsigned int bit = (letter[(unsigned int)(i/size)] >> (unsigned int)(j/size)) & 1u;  // i-th bit (0 = LSB)
+            if(bit == 1){
+                draw_pixel(x+j, y+i, c);
+            }
+            else{
+                draw_pixel(x+j, y+i, (struct pixelcolor){0,0,0,255});
+            }
+        }
+    }
+}
+
+void virtio_gpu_driver::draw_text(int x, int y, const char *string, int string_size, struct pixelcolor c, int text_size){
+    for(int i = 0; i<string_size; ++i){
+        draw_letter(x+i*text_size*8, y, string[i], c, text_size);
     }
 }
