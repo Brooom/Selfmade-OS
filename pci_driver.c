@@ -1,5 +1,6 @@
 #include "pci_driver.h"
-#include "uart.h"
+#include "kernel_logs/kernel_logger_c_api.h"
+#include <stddef.h>
 
 
 volatile uint8_t* ecam_ptr(const struct bus_device_function bdf, uint16_t off) {
@@ -20,21 +21,10 @@ struct bus_device_function search_pci_device(uint16_t device_id, uint16_t vendor
                 volatile uint32_t* pointer = (volatile uint32_t*)ecam_ptr(bdf, 0);
                 if(verbose == 1){
                     char buf[12];
-                    put_uart("bus: ", 0);
-                    int_to_str(i, buf);
-                    put_uart(buf, 0);
-                    put_uart(", dev: ", 0);
-                    int_to_str(j, buf);
-                    put_uart(buf, 0);
-                    put_uart(", fn: ", 0);
-                    int_to_str(k, buf);
-                    put_uart(buf, 0);
-                    put_uart(", Value: ", 0);
-                    u32_to_hex(*pointer, buf);
-                    put_uart(buf, 1);
+                    kernel_logger_log("bus: %u, dev: %u, fn: %u, Value: %x", i, j, k, pointer);
                 }
                 if(((uint32_t)device_id << 16 | vendor_id) == *pointer){
-                    if(verbose == 1) put_uart("Found device.", 1);
+                    if(verbose == 1) kernel_logger_log("Found device.");
                     return bdf;
                 }
             }
@@ -45,7 +35,7 @@ struct bus_device_function search_pci_device(uint16_t device_id, uint16_t vendor
 void print_pci_config_space_header(struct bus_device_function bdf){
     for(int i = 0; i<16; ++i){
         volatile uint32_t* pointer = (volatile uint32_t*)ecam_ptr(bdf, i*4);
-        uart_send_hex_value(pointer, sizeof(*pointer));
+        kernel_logger_log("%x", pointer);
     }
 }
 
@@ -61,43 +51,31 @@ struct virtio_pci_cap* get_pci_capability(struct bus_device_function bdf, uint8_
     struct virtio_pci_cap *cap = (struct virtio_pci_cap*)p;
     while((cap->cfg_type) != cfg_type){
         if(verbose == 1){
-            put_uart("\n", 0);
-            put_uart("Capability     ", 0);
-            uart_send_dec_value(i);
-            put_uart("Capability id: ", 0);
-            uart_send_hex_value(&cap->cap_vndr, sizeof(cap->cap_vndr));
-            put_uart("next:          ", 0);
-            uart_send_hex_value(&cap->cap_next, sizeof(cap->cap_next));
-            put_uart("bar:           ", 0);
-            uart_send_hex_value(&cap->bar, sizeof(cap->bar));
-            put_uart("config type:   ", 0);
-            uart_send_hex_value(&cap->cfg_type, sizeof(cap->cfg_type));
-            put_uart("Offset:        ", 0);
-            uart_send_hex_value(&cap->offset, sizeof(cap->offset));
-            put_uart("\n", 0);
+            kernel_logger_log("\n");
+            kernel_logger_log("Capability     %u", i);
+            kernel_logger_log("Capability id: %x", cap->cap_vndr);
+            kernel_logger_log("next:          %x", cap->cap_next);
+            kernel_logger_log("bar:           %x", cap->bar);
+            kernel_logger_log("config type:   %x", cap->cfg_type);
+            kernel_logger_log("Offset:        %x", cap->offset);
+            kernel_logger_log("\n");
         }
         p = ecam_ptr(bdf, cap->cap_next & 0xFC);
         cap = (struct virtio_pci_cap*)p;
         if((cap->cap_next & 0xFC) == 0x0){
-            put_uart("Could not find this capability type.", 1);
+            kernel_logger_log("Could not find this capability type.");
             break;
         }
     }
     if(verbose == 1){
-        put_uart("\n", 0);
-        put_uart("Capability     ", 0);
-        uart_send_dec_value(i);
-        put_uart("Capability id: ", 0);
-        uart_send_hex_value(&cap->cap_vndr, sizeof(cap->cap_vndr));
-        put_uart("next:          ", 0);
-        uart_send_hex_value(&cap->cap_next, sizeof(cap->cap_next));
-        put_uart("bar:           ", 0);
-        uart_send_hex_value(&cap->bar, sizeof(cap->bar));
-        put_uart("config type:   ", 0);
-        uart_send_hex_value(&cap->cfg_type, sizeof(cap->cfg_type));
-        put_uart("Offset:        ", 0);
-        uart_send_hex_value(&cap->offset, sizeof(cap->offset));
-        put_uart("\n", 0);
+        kernel_logger_log("\n");
+        kernel_logger_log("Capability     %u", i);
+        kernel_logger_log("Capability id: %x", cap->cap_vndr);
+        kernel_logger_log("next:          %x", cap->cap_next);
+        kernel_logger_log("bar:           %x", cap->bar);
+        kernel_logger_log("config type:   %x", cap->cfg_type);
+        kernel_logger_log("Offset:        %x", cap->offset);
+        kernel_logger_log("\n");
     }
     return cap;
 }
@@ -129,7 +107,7 @@ static uint64_t BAR_size(struct bus_device_function bdf, uint8_t bar_index, bool
         *coomand_register = coomand_register_before;
     }
     else{
-        put_uart("Other implementation needed", 1);
+        kernel_logger_log("Other implementation needed");
         size = 0;
     }
     *coomand_register = coomand_register_before;
@@ -142,8 +120,8 @@ uint64_t* alloc_bar_memory(struct bus_device_function bdf, uint8_t bar_index, bo
     volatile uint32_t *start_BAR = (volatile uint32_t*)ecam_ptr(bdf, 0x10);
     volatile uint32_t *BAR = start_BAR + bar_index;
     if(verbose == 1){
-        put_uart("gggggggggggg ", 0);
-        uart_send_hex_value(BAR, sizeof(*BAR));
+        kernel_logger_log("gggggggggggg %x", *BAR);
+
     }
     uint8_t memory_type;
     if((*BAR & 1) == 1){
@@ -159,19 +137,17 @@ uint64_t* alloc_bar_memory(struct bus_device_function bdf, uint8_t bar_index, bo
         memory_type = 2; 
     }
     else{
-        put_uart("Wrong memory type:", 1);
+        kernel_logger_log("Wrong memory type!");
     }
 
     // Address length: 0 32-bit 1 reserved 2 64-bit
     uint8_t address_length = (*BAR & 6) >> 1;
     if(verbose == 1){
-        put_uart("address length: ", 0);
-        uart_send_dec_value(address_length);
+        kernel_logger_log("address length: %x", address_length);
     }
 
     if(verbose == 1){
-        put_uart("Memory type: ", 0);
-        uart_send_dec_value(memory_type);
+        kernel_logger_log("Memory type: %u", memory_type);
     }
     uint64_t bar_size = BAR_size(bdf, bar_index, 1);
     uint64_t offset = bar_size;
@@ -183,7 +159,7 @@ uint64_t* alloc_bar_memory(struct bus_device_function bdf, uint8_t bar_index, bo
             }
         }
         else{
-            put_uart("Address length 64-bit for memory type 1 not implemented so far", 1);
+            kernel_logger_log("Address length 64-bit for memory type 1 not implemented so far");
         }
     }
     else if(memory_type == 2){
@@ -194,7 +170,7 @@ uint64_t* alloc_bar_memory(struct bus_device_function bdf, uint8_t bar_index, bo
             }
         }
         else{
-            put_uart("Address length 64-bit for memory type 2 not implemented so far", 1);
+            kernel_logger_log("Address length 64-bit for memory type 2 not implemented so far");
         }
     }
     else if(memory_type == 3){
@@ -208,11 +184,11 @@ uint64_t* alloc_bar_memory(struct bus_device_function bdf, uint8_t bar_index, bo
             }
         }
         else{
-            put_uart("Address length 64-bit for memory type 1 not implemented so far", 1);
+            kernel_logger_log("Address length 64-bit for memory type 1 not implemented so far");
         }
     }
     else{
-        put_uart("Wrong memory type.", 1);
+        kernel_logger_log("Wrong memory type.");
         return NULL;
     }
 }

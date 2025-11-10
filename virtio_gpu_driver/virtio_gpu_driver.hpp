@@ -45,6 +45,21 @@ struct virtq {
     struct virtq_used  *used;    /* used ring (with num entries) */
 };
 
+struct pixelcolor{
+    uint8_t b;
+    uint8_t g;
+    uint8_t r;
+    uint8_t a;
+};
+
+/* Rectangle (x, y, width, height) */
+struct virtio_gpu_rect {
+    uint32_t x;
+    uint32_t y;
+    uint32_t width;
+    uint32_t height;
+};
+
 class virtio_gpu_driver{
     public:
         struct bus_device_function bdf;
@@ -54,15 +69,22 @@ class virtio_gpu_driver{
         void set_scanout_param();
         void transfer_to_host_2d();
         void resource_flush();
+        void draw_pixel(int x, int y, struct pixelcolor);
+        void draw_rec(struct virtio_gpu_rect rec, pixelcolor c);
+        void draw_letter(int x, int y, char l, struct pixelcolor c, int size);
+        void draw_text(int x, int y, const char *string, int string_size, struct pixelcolor c, int text_size);
 
     private:
         struct virtq virtq;
         int queue_size = 0;
         uint16_t descriptor_index = 0;
         volatile uint32_t *queue_notify_address;
+        int screen_height = 800;
+        int screen_width = 1280;
+        pixelcolor* display;
         struct virtq construct_virtqueue(volatile struct virtio_pci_common_cfg *common_cfg);
         virtq_desc* get_next_descriptor();
         
-};
 
+};
 #endif
