@@ -1,9 +1,0 @@
-{
-    "files.associations": {
-        "string": "cpp",
-        "limits": "cpp",
-        "ratio": "cpp",
-        "variant": "cpp"
-    },
-    "C_Cpp.default.compilerPath": "/opt/homebrew/bin/aarch64-elf-g++"
-}

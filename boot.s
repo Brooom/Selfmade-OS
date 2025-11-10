@@ -1,4 +1,4 @@
-.section .boot, "ax"
+.text
 .global _start
 
 _start:
