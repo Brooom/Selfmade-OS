@@ -24,8 +24,20 @@ The build drops `build/kernel.elf` (ELF for QEMU) and `build/kernel.img` (raw im
 ```sh
 ./run.sh
 ```
-
 The helper script boots `qemu-system-aarch64 -M virt …` and mirrors the serial log to both the terminal and a timestamped file in `$TMPDIR`.
+
+## Run under QEMU and debug
+In terminal 1:
+```sh
+./run_debug_quemu.sh
+```
+Starts quemu for debugging.
+
+In terminal 2:
+```sh
+./run_debug_gdb.sh
+```
+Starts gdb for debugging.
 
 ## Toward Raspberry Pi
 - Swap the current VirtIO-GPU and PCI paths with Raspberry Pi MMIO peripherals (framebuffer/UART/interrupts).
