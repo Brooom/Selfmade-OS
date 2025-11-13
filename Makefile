@@ -3,7 +3,7 @@ OBJCOPY = aarch64-elf-objcopy
 
 PROJECT_ROOT := $(CURDIR)
 
-CFLAGS  = -ffreestanding -mgeneral-regs-only -I$(PROJECT_ROOT)
+CFLAGS  = -ffreestanding -mgeneral-regs-only -I$(PROJECT_ROOT) -g
 LDFLAGS = -nostdlib -nostartfiles -T linker.ld 
 
 CXX = aarch64-elf-g++
@@ -11,7 +11,8 @@ CXXFLAGS = $(CFLAGS) -I$(PROJECT_ROOT)
 
 BUILD_DIR = ./build
 
-OBJS = boot.o kernel.o uart.o allocator.o virtio_gpu_driver.o pci_driver.o terminal.o formating.o kernel_logger.o
+OBJS = boot.o kernel.o uart.o allocator.o virtio_gpu_driver.o \
+       pci_driver.o terminal.o formating.o kernel_logger.o exceptions.o
 OBJ_FILES := $(addprefix $(BUILD_DIR)/,$(OBJS))
 
 all: prepare $(BUILD_DIR)/kernel.img
@@ -45,6 +46,9 @@ $(BUILD_DIR)/formating.o: std/formating.c std/formating.h
 
 $(BUILD_DIR)/kernel_logger.o: kernel_logs/kernel_logger.cpp kernel_logs/kernel_logger.hpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/exceptions.o: exceptions/exceptions.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/kernel.elf: linker.ld $(OBJ_FILES)
 	$(CC) $(LDFLAGS) $(OBJ_FILES) -o $@
