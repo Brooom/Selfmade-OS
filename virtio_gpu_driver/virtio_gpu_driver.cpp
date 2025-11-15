@@ -594,3 +594,11 @@ void virtio_gpu_driver::draw_text(int x, int y, const char *string, int string_s
         draw_letter(x+i*text_size*8, y, string[i], c, text_size);
     }
 }
+
+void virtio_gpu_driver::clear_screen(){
+    for(int i = 0; i<screen_width; ++i){
+        for(int j = 0; j<screen_height; ++j){
+            draw_pixel(i, j, pixelcolor{0, 0, 0, 255});
+        }
+    }
+}
