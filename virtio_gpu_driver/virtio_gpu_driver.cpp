@@ -507,7 +507,7 @@ void virtio_gpu_driver::transfer_to_host_2d(){
         kernel_logger::log("Wrong return typ for transfer: %x", false ,response->type);
     }
     else{
-        kernel_logger::log("Transfer to host worked.", false);
+        //kernel_logger::log("Transfer to host worked.", false);
     }
 }
 
@@ -556,7 +556,7 @@ void virtio_gpu_driver::resource_flush(){
         kernel_logger::log("Wrong return typ for resource flush: ", false, response->type);
     }
     else{
-        kernel_logger::log("Resource flush worked.", false);
+        //kernel_logger::log("Resource flush worked.", false);
     }
 }
 

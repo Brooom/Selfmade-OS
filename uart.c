@@ -14,7 +14,7 @@ void uart_send(const char *string, int string_length, ...)
     va_start(args, string_length);
     format_string(string, output_string, string_length, args);
     va_end(args);
-    put_uart(output_string, 1);
+    put_uart(output_string, 0);
 }
 
 static void put_uart(const char *s, bool new_line)
