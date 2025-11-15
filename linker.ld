@@ -10,13 +10,14 @@ SECTIONS {
     .vectors : { KEEP(*(.vectors)) }
     .bss  : { *(.bss) }
     . = ALIGN(16); /* Rounds the location counter up */
-    stack_bottom = .;
+    kernel_stack_bottom = .;
     . = . + 0x10000; /* Increases the location counter by 4096 bytes. Such that the stack has that much space since the stack grows downwards. */
     /* Note: Every .blablabla increases the location counter */
-    stack_top = .;
+    kernel_stack_top = .;
     . = . + 1;
     . = ALIGN(16);
-    heap_start = .;
+    kernel_heap_start = .;
     . = . + 0x10000;
-    heap_end = .;
+    kernel_heap_end = 0x50000000;
+    . = kernel_heap_end;
 }

@@ -1,17 +1,11 @@
 #include "kernel_logs/kernel_logger.hpp"
 #include "pci_driver.h"
 #include "virtio_gpu_driver/virtio_gpu_driver.hpp"
-#include "allocator.h"
+#include "allocator/allocator.h"
 #include "terminal.hpp"
 #include "uart.h"
 
-extern uintptr_t stack_top;
-extern uintptr_t stack_bottom;
-extern uintptr_t heap_start;
-extern uintptr_t heap_end;
-static void force_sync_exception(void);
 extern "C" void kernel_main(void) {
-    init();
     struct bus_device_function bdf = search_pci_device(0x1050, 0x1af4, 1);
     print_pci_config_space_header(bdf);
     virtio_gpu_driver gpu_driver;
@@ -63,12 +57,6 @@ extern "C" void kernel_main(void) {
 
     kernel_logger::log("z");
 
-    force_sync_exception();
 
     kernel_logger::log("z");
-}
-
-static void force_sync_exception(void) {
-    asm volatile("brk #0");   // software breakpoint → sync exception (ESR_EC = 0x3c)
-    __builtin_unreachable();  // keeps the compiler from assuming we return
 }

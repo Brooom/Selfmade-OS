@@ -45,7 +45,7 @@ msr VBAR_EL1, x0
 
 isb //Clear cpu cache
 
-ldr x1,=stack_top
+ldr x1,=kernel_stack_top
 mov sp,x1
 mov x29,xzr 
 mov x20,xzr
