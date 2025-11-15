@@ -4,7 +4,6 @@
 #include "allocator.h"
 #include "terminal.hpp"
 #include "uart.h"
-#include "kernel.h"
 
 extern uintptr_t stack_top;
 extern uintptr_t stack_bottom;
@@ -27,13 +26,13 @@ extern "C" void kernel_main(void) {
         }
     }
     gpu_driver.draw_rec((struct virtio_gpu_rect){100, 100, 100, 100}, (struct pixelcolor){0,0,255,255});
-    // gpu_driver.draw_letter(0,0,'H',(struct pixelcolor){255,255,255,255}, 5);
-    // gpu_driver.draw_letter(40,0,'a',(struct pixelcolor){255,255,255,255}, 5);
-    // gpu_driver.draw_letter(80,0,'l',(struct pixelcolor){255,255,255,255}, 5);
-    // gpu_driver.draw_letter(120,0,'l',(struct pixelcolor){255,255,255,255}, 5);
-    // gpu_driver.draw_letter(160,0,'o',(struct pixelcolor){255,255,255,255}, 5);
-    // char text[] = "hallo world";
-    // gpu_driver.draw_text(0, 40, text, sizeof(text), (struct pixelcolor){255,255,255,255}, 2);
+    gpu_driver.draw_letter(0,0,'H',(struct pixelcolor){255,255,255,255}, 5);
+    gpu_driver.draw_letter(40,0,'a',(struct pixelcolor){255,255,255,255}, 5);
+    gpu_driver.draw_letter(80,0,'l',(struct pixelcolor){255,255,255,255}, 5);
+    gpu_driver.draw_letter(120,0,'l',(struct pixelcolor){255,255,255,255}, 5);
+    gpu_driver.draw_letter(160,0,'o',(struct pixelcolor){255,255,255,255}, 5);
+    char text[] = "hallo world";
+    gpu_driver.draw_text(0, 40, text, sizeof(text), (struct pixelcolor){255,255,255,255}, 2);
 
     gpu_driver.transfer_to_host_2d();
     gpu_driver.resource_flush();
