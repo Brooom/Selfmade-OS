@@ -14,6 +14,7 @@ terminal::terminal(virtio_gpu_driver *gd)
 
 void terminal::printf(const char *fom, ...)
 {
+    gpu_driver->clear_screen();
     va_list args;
     va_start(args, fom);
     format_string(fom, (*circular_buffer)[head], MAX_TEXT_LENGTH, args);
