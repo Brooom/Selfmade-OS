@@ -9,10 +9,10 @@ extern uint8_t kernel_heap_end[];
 uint8_t *current_free = kernel_heap_start;
 
 
-void* kalloc(uint32_t size, uint32_t allignment){   
+void* kalloc(int size, int allignment){   
     current_free = (uint8_t*) allign(current_free, allignment);
     uint8_t *start_add = current_free;
-    for (uint32_t i = 0; i < size; ++i){
+    for (int i = 0; i < size; ++i){
         current_free[i] = 0;
     }
     current_free += size;
@@ -24,7 +24,7 @@ void kfree(void *pointer)
     kernel_logger_log("The bump allocator can not free memory.");
 }
 
-static uintptr_t allign(void *addr, uint32_t allignment)
+static uintptr_t allign(void *addr, int allignment)
 {
     uintptr_t pointer = (uintptr_t) addr;
     pointer += allignment-1;
