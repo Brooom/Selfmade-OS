@@ -35,8 +35,8 @@ $(BUILD_DIR)/pci_driver.o: pci_driver.c pci_driver.h
 $(BUILD_DIR)/uart.o: uart.c uart.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/allocator.o: allocator/bump_allocator.c allocator/allocator.h
-	$(CC) $(CFLAGS) -c $< -o $@ 
+$(BUILD_DIR)/allocator.o: allocator/free_list_allocator.c allocator/allocator.h
+	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/terminal.o: terminal.cpp terminal.hpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@

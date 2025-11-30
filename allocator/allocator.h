@@ -8,15 +8,13 @@ extern "C" {
 #include <stdint.h>
 #include <stddef.h>
 
-void init();
-void* kalloc(uint32_t size, uint32_t allignment);
+void init_mmu();
+void* kalloc(int size, int allignment);
 void kfree(void* pointer);
-static uintptr_t allign(void *addr, uint32_t allignment);
-static void *memcpy(void *dest, const void *src, size_t n);
+static void* allign(void *addr, int allignment);
 
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
-
 
 #endif

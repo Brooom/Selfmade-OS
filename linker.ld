@@ -18,6 +18,6 @@ SECTIONS {
     . = ALIGN(16);
     kernel_heap_start = .;
     . = . + 0x10000;
-    kernel_heap_end = 0x50000000;
+    kernel_heap_end = 0x50000000-1;
     . = kernel_heap_end;
 }

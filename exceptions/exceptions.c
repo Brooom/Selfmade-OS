@@ -12,9 +12,9 @@ void sync_exception_current_EL_using_SPEL0(){
 
     kernel_logger_log("Synchronous exception:");
     kernel_logger_log("Exception from the current EL while using SP_EL0");
-    kernel_logger_log("  ESR_EL1_EC: 0x%x\n", esr_ec);
-    kernel_logger_log("  ELR_EL1: 0x%lx\n", elr);
-    kernel_logger_log("  FAR_EL1: 0x%lx\n", far);
+    kernel_logger_log("  ESR_EL1_EC: %x\n", esr_ec);
+    kernel_logger_log("  ELR_EL1: %lx\n", elr);
+    kernel_logger_log("  FAR_EL1: %lx\n", far);
     
 }  
 void irq_handler_current_EL_using_SPEL0(){
@@ -39,9 +39,9 @@ void sync_exception_current_EL_using_SPEL1(){
 
     kernel_logger_log("Synchronous exception:");
     kernel_logger_log("Exception from the current EL while using SP_EL1");
-    kernel_logger_log("  ESR_EL1_EC: 0x%x\n", esr_ec);
-    kernel_logger_log("  ELR_EL1: 0x%lx\n", elr);
-    kernel_logger_log("  FAR_EL1: 0x%lx\n", far);
+    kernel_logger_log("  ESR_EL1_EC: %x\n", esr_ec);
+    kernel_logger_log("  ELR_EL1: %lx\n", elr);
+    kernel_logger_log("  FAR_EL1: %lx\n", far);
 
 }      
 void irq_handler_current_EL_using_SPEL1(){

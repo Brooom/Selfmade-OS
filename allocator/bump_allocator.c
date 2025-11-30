@@ -24,20 +24,20 @@ void kfree(void *pointer)
     kernel_logger_log("The bump allocator can not free memory.");
 }
 
-static uintptr_t allign(void *addr, int allignment)
+static void* allign(void *addr, int allignment)
 {
     uintptr_t pointer = (uintptr_t) addr;
     pointer += allignment-1;
     pointer &= ~(allignment-1);
-    return pointer;
+    return (void *) pointer;
 }
 
-static void *memcpy(void *dest, const void *src, size_t n) {
-    unsigned char *d = dest;
-    const unsigned char *s = src;
+// static void *memcpy(void *dest, const void *src, size_t n) {
+//     unsigned char *d = dest;
+//     const unsigned char *s = src;
 
-    while (n--) {
-        *d++ = *s++;
-    }
-    return dest;
-}
+//     while (n--) {
+//         *d++ = *s++;
+//     }
+//     return dest;
+// }
