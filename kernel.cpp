@@ -62,13 +62,4 @@ extern "C" void kernel_main(void) {
     te.printf("test: %%", &d);
 
     kernel_logger::log("z");
-
-    force_sync_exception();
-
-    kernel_logger::log("z");
-}
-
-static void force_sync_exception(void) {
-    asm volatile("brk #0");   // software breakpoint → sync exception (ESR_EC = 0x3c)
-    __builtin_unreachable();  // keeps the compiler from assuming we return
 }
