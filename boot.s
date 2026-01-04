@@ -36,16 +36,18 @@ vector_table:
 .global _start
 
 _start:
-//Check which on which EL the program is (currently EL1)
+//Check on which EL the program is (currently EL1)
 //mrs x0, CurrentEL
 //str x0, [sp, #16]
+
+
 msr daifclr, #0xf   // clear D, A, I, F bits
 ldr x0, =vector_table
 msr VBAR_EL1, x0
 
 isb //Clear cpu cache
 
-ldr x1,=stack_top
+ldr x1,=kernel_stack_top
 mov sp,x1
 mov x29,xzr 
 mov x20,xzr
