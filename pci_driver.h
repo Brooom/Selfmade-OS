@@ -59,6 +59,7 @@ void print_pci_config_space_header(struct bus_device_function bdf);
 /** Get pci capability of specific type defined by */
 struct virtio_pci_cap* get_pci_capability(struct bus_device_function bdf, uint8_t cfg_type, bool verbose);
 
+// This values come from the virt.dts file
 #define CPU_PCI_IO_BASE_ADDRESS                  UINT64_C(0x000000003EFF0000)
 #define CPU_PCI_IO_SIZE                          UINT64_C(0x0000000000010000)
 #define BUS_PCI_IO_BASE_ADDRESS                  UINT32_C(0x00000000)
@@ -70,9 +71,12 @@ struct virtio_pci_cap* get_pci_capability(struct bus_device_function bdf, uint8_
 #define CPU_PCI_MEMORY_PREFETCHABLE_BASE         UINT64_C(0x0000008000000000)
 #define CPU_PCI_MEMORY_PREFETCHABLE_SIZE         UINT64_C(0x0000008000000000)
 #define BUS_PCI_MEMORY_PREFETCHABLE_BASE         UINT64_C(0x0000008000000000)
+/**
+ * Allocate and map CPU-visible memory for a PCI BAR and program the BAR register.
+ */
 uint64_t* alloc_bar_memory(struct bus_device_function bdf, uint8_t bar_index, bool verbose);
 
-/** Get pci capability offset */
+/** Read the PCI capability list pointer from config space. */
 static uint8_t get_pci_capability_offset(struct bus_device_function bdf);
 /** Get size of the memory one has to allocate for the base address register (bar) */
 static uint64_t BAR_size(struct bus_device_function bdf, uint8_t bar_index, bool verbose);
