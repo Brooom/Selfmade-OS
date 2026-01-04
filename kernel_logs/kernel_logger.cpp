@@ -9,7 +9,6 @@ void kernel_logger::vlog(const char *fmt, va_list args, bool send_terminal) {
     format_string(fmt, output, MAX_TEXT_LENGTH, args);
     if (log_terminal && send_terminal) log_terminal->printf("%s", output);
     uart_send(output, MAX_TEXT_LENGTH);
-    uart_send("\n",3);
 }
 
 void kernel_logger::init_terminal(terminal *terminal)

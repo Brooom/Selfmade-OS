@@ -1,7 +1,10 @@
 #include "kernel_logs/kernel_logger.hpp"
+#include "kernel_logs/kernel_logger.hpp"
 #include "pci_driver.h"
 #include "virtio_gpu_driver/virtio_gpu_driver.hpp"
 #include "allocator.h"
+#include "terminal.hpp"
+#include "uart.h"
 #include "terminal.hpp"
 #include "uart.h"
 
@@ -26,13 +29,13 @@ extern "C" void kernel_main(void) {
         }
     }
     gpu_driver.draw_rec((struct virtio_gpu_rect){100, 100, 100, 100}, (struct pixelcolor){0,0,255,255});
-    gpu_driver.draw_letter(0,0,'H',(struct pixelcolor){255,255,255,255}, 5);
-    gpu_driver.draw_letter(40,0,'a',(struct pixelcolor){255,255,255,255}, 5);
-    gpu_driver.draw_letter(80,0,'l',(struct pixelcolor){255,255,255,255}, 5);
-    gpu_driver.draw_letter(120,0,'l',(struct pixelcolor){255,255,255,255}, 5);
-    gpu_driver.draw_letter(160,0,'o',(struct pixelcolor){255,255,255,255}, 5);
-    char text[] = "hallo world";
-    gpu_driver.draw_text(0, 40, text, sizeof(text), (struct pixelcolor){255,255,255,255}, 2);
+    // gpu_driver.draw_letter(0,0,'H',(struct pixelcolor){255,255,255,255}, 5);
+    // gpu_driver.draw_letter(40,0,'a',(struct pixelcolor){255,255,255,255}, 5);
+    // gpu_driver.draw_letter(80,0,'l',(struct pixelcolor){255,255,255,255}, 5);
+    // gpu_driver.draw_letter(120,0,'l',(struct pixelcolor){255,255,255,255}, 5);
+    // gpu_driver.draw_letter(160,0,'o',(struct pixelcolor){255,255,255,255}, 5);
+    // char text[] = "hallo world";
+    // gpu_driver.draw_text(0, 40, text, sizeof(text), (struct pixelcolor){255,255,255,255}, 2);
 
     gpu_driver.transfer_to_host_2d();
     gpu_driver.resource_flush();
@@ -62,13 +65,4 @@ extern "C" void kernel_main(void) {
     te.printf("test: %%", &d);
 
     kernel_logger::log("z");
-
-    force_sync_exception();
-
-    kernel_logger::log("z");
-}
-
-static void force_sync_exception(void) {
-    asm volatile("brk #0");   // software breakpoint → sync exception (ESR_EC = 0x3c)
-    __builtin_unreachable();  // keeps the compiler from assuming we return
 }
