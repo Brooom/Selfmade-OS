@@ -507,7 +507,7 @@ void virtio_gpu_driver::transfer_to_host_2d(){
         kernel_logger::log("Wrong return typ for transfer: %x", false ,response->type);
     }
     else{
-        kernel_logger::log("Transfer to host worked.", false);
+        //kernel_logger::log("Transfer to host worked.", false);
     }
 }
 
@@ -556,7 +556,7 @@ void virtio_gpu_driver::resource_flush(){
         kernel_logger::log("Wrong return typ for resource flush: ", false, response->type);
     }
     else{
-        kernel_logger::log("Resource flush worked.", false);
+        //kernel_logger::log("Resource flush worked.", false);
     }
 }
 
@@ -592,5 +592,13 @@ void virtio_gpu_driver::draw_letter(int x, int y, char l, struct pixelcolor c, i
 void virtio_gpu_driver::draw_text(int x, int y, const char *string, int string_size, struct pixelcolor c, int text_size){
     for(int i = 0; i<string_size; ++i){
         draw_letter(x+i*text_size*8, y, string[i], c, text_size);
+    }
+}
+
+void virtio_gpu_driver::clear_screen(){
+    for(int i = 0; i<screen_width; ++i){
+        for(int j = 0; j<screen_height; ++j){
+            draw_pixel(i, j, pixelcolor{0, 0, 0, 255});
+        }
     }
 }

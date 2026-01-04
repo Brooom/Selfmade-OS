@@ -8,5 +8,8 @@ qemu-system-aarch64 \
     -chardev stdio,mux=on,id=console0,logfile=$FILE \
     -serial chardev:console0 \
     -kernel build/kernel.elf \
-    -monitor unix:/tmp/qemu-monitor-socket,server,nowait -s -S
-echo "Saved to: $FILE
+    -monitor unix:/tmp/qemu-monitor-socket.sock,server,nowait -s -S
+echo "Saved to: $FILE"
+
+#To start the qemu monitor use "socat -,raw,echo=0 unix-connect:/tmp/qemu-monitor-socket.sock"
+

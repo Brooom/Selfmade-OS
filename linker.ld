@@ -5,6 +5,9 @@ SECTIONS {
     .boot : { *(.boot) } /* Places the boot script at . */
     .text : { *(.text) } /* Places all the remaining text sections after the boot section. So in my case the .c files */
     .data : { *(.data) } /* Same as with the text section with the data section */
+    . = ALIGN(64);
+    vector_table = .;
+    .vectors : { KEEP(*(.vectors)) }
     .bss  : { *(.bss) }
     . = ALIGN(16); /* Rounds the location counter up */
     stack_bottom = .;

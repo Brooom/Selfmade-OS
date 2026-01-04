@@ -73,6 +73,7 @@ class virtio_gpu_driver{
         void draw_rec(struct virtio_gpu_rect rec, pixelcolor c);
         void draw_letter(int x, int y, char l, struct pixelcolor c, int size);
         void draw_text(int x, int y, const char *string, int string_size, struct pixelcolor c, int text_size);
+        void clear_screen();
 
     private:
         struct virtq virtq;

@@ -21,7 +21,8 @@ struct bus_device_function search_pci_device(uint16_t device_id, uint16_t vendor
                 volatile uint32_t* pointer = (volatile uint32_t*)ecam_ptr(bdf, 0);
                 if(verbose == 1){
                     char buf[12];
-                    kernel_logger_log("bus: %u, dev: %u, fn: %u, Value: %x", i, j, k, pointer);
+                    kernel_logger_log("bus: %u, dev: %u, fn: %u, Value: %x", i, j, k, 
+                        pointer);
                 }
                 if(((uint32_t)device_id << 16 | vendor_id) == *pointer){
                     if(verbose == 1) kernel_logger_log("Found device.");
@@ -60,13 +61,15 @@ struct virtio_pci_cap* get_pci_capability(struct bus_device_function bdf, uint8_
             kernel_logger_log("Offset:        %x", cap->offset);
             kernel_logger_log("\n");
         }
-        p = ecam_ptr(bdf, cap->cap_next & 0xFC);
-        cap = (struct virtio_pci_cap*)p;
         if((cap->cap_next & 0xFC) == 0x0){
             kernel_logger_log("Could not find this capability type.");
             break;
         }
+        p = ecam_ptr(bdf, cap->cap_next & 0xFC);
+        cap = (struct virtio_pci_cap*)p;
+        
     }
+
     if(verbose == 1){
         kernel_logger_log("\n");
         kernel_logger_log("Capability     %u", i);
@@ -120,7 +123,7 @@ uint64_t* alloc_bar_memory(struct bus_device_function bdf, uint8_t bar_index, bo
     volatile uint32_t *start_BAR = (volatile uint32_t*)ecam_ptr(bdf, 0x10);
     volatile uint32_t *BAR = start_BAR + bar_index;
     if(verbose == 1){
-        kernel_logger_log("gggggggggggg %x", *BAR);
+        kernel_logger_log("BAR register %x", *BAR);
 
     }
     uint8_t memory_type;
@@ -155,7 +158,7 @@ uint64_t* alloc_bar_memory(struct bus_device_function bdf, uint8_t bar_index, bo
         if(address_length == 0){
             if(CPU_PCI_IO_BASE_ADDRESS+offset+bar_size < CPU_PCI_IO_BASE_ADDRESS+CPU_PCI_IO_SIZE){
                 BAR[bar_index] = (uint32_t) BUS_PCI_IO_BASE_ADDRESS+offset;
-                return (uint_fast64_t*) CPU_PCI_IO_BASE_ADDRESS+offset;
+                return (uint64_t*) CPU_PCI_IO_BASE_ADDRESS+offset;
             }
         }
         else{
@@ -166,7 +169,7 @@ uint64_t* alloc_bar_memory(struct bus_device_function bdf, uint8_t bar_index, bo
         if(address_length == 0){
             if(CPU_PCI_MEMORY_NON_PREFETCHABLE_BASE+offset+bar_size < CPU_PCI_MEMORY_NON_PREFETCHABLE_BASE+CPU_PCI_MEMORY_NON_PREFETCHABLE_SIZE){
                 BAR[bar_index] = (uint32_t) BUS_PCI_MEMORY_NON_PREFETCHABLE_BASE+offset;
-                return (uint_fast64_t*) CPU_PCI_MEMORY_NON_PREFETCHABLE_BASE+offset;
+                return (uint64_t*) CPU_PCI_MEMORY_NON_PREFETCHABLE_BASE+offset;
             }
         }
         else{
@@ -180,7 +183,7 @@ uint64_t* alloc_bar_memory(struct bus_device_function bdf, uint8_t bar_index, bo
                 uint64_t v = (uint64_t) CPU_PCI_MEMORY_PREFETCHABLE_BASE+offset;
                 BAR[0] = (uint32_t) v;
                 BAR[1] = (uint32_t) (v>>32);
-                return (uint_fast64_t*) v;
+                return (uint64_t*) v;
             }
         }
         else{
