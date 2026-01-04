@@ -12,7 +12,8 @@ CXXFLAGS = $(CFLAGS) -I$(PROJECT_ROOT)
 BUILD_DIR = ./build
 
 OBJS = boot.o kernel.o uart.o allocator.o virtio_gpu_driver.o \
-       pci_driver.o terminal.o formating.o kernel_logger.o exceptions.o
+       pci_driver.o terminal.o formating.o kernel_logger.o exceptions.o init_simple_mmu.o simple_mmu.o
+
 OBJ_FILES := $(addprefix $(BUILD_DIR)/,$(OBJS))
 
 all: prepare $(BUILD_DIR)/kernel.img
@@ -35,8 +36,14 @@ $(BUILD_DIR)/pci_driver.o: pci_driver.c pci_driver.h
 $(BUILD_DIR)/uart.o: uart.c uart.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/allocator.o: allocator.c allocator.h
-	$(CC) $(CFLAGS) -c $< -o $@ 
+$(BUILD_DIR)/allocator.o: allocator/bump_allocator.c allocator/allocator.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/init_simple_mmu.o: init_simple_mmu.S
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/simple_mmu.o: simple_mmu.c simple_mmu.h
+	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/terminal.o: terminal.cpp terminal.hpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@

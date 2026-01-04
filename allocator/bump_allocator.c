@@ -2,15 +2,16 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "kernel_logs/kernel_logger_c_api.h"
-
+#include "simple_mmu.h"
 
 extern uint8_t kernel_heap_start[];
 extern uint8_t kernel_heap_end[];
-
+extern void init_simple_mmu(void);
 uint8_t *current_free = kernel_heap_start;
 
 void init_mmu(){
-
+    init_simple_mmu();
+    init_pagetable();
 }
 
 void* kalloc(size_t size, int allignment){   
