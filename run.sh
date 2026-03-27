@@ -8,5 +8,5 @@ qemu-system-aarch64 \
     -chardev stdio,mux=on,id=console0,logfile=$FILE \
     -serial chardev:console0 \
     -kernel build/kernel.elf \
-    -monitor unix:/tmp/qemu-monitor-socket,server,nowait -s -S
+    -monitor unix:/tmp/qemu-monitor-socket,server,nowait
 echo "Saved to: $FILE
