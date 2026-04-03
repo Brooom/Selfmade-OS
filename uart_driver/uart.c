@@ -3,9 +3,14 @@
 #include <stddef.h>
 
 #include "uart.h"
+#include "../mmu/mmu.h"
 
 //address where to write the char values to for to transmit over uart
 volatile unsigned int * const UART0DR = (unsigned int *)0x9000000;
+
+void init_uart(){
+    register_device_memory((uintptr_t)0x9000000, (uint32_t)PAGESIZE);
+}
 
 void uart_send(const char *string, int string_length, ...)
 {

@@ -1,18 +1,16 @@
 #include "kernel_logs/kernel_logger.hpp"
 #include "kernel_logs/kernel_logger.hpp"
-#include "pci_driver.h"
+#include "pci_driver/pci_driver.h"
 #include "virtio_gpu_driver/virtio_gpu_driver.hpp"
-#include "allocator/allocator.h"
-#include "terminal.hpp"
-#include "uart.h"
-#include "terminal.hpp"
-#include "uart.h"
+#include "kernel_allocator/kernel_allocator.h"
+#include "terminal/terminal.hpp"
+#include "uart_driver/uart.h"
 
 extern "C" void kernel_main(void) {
     kernel_logger::log("Start kernel: %s %s", __DATE__, __TIME__);
-    init_mmu();
-    uint8_t *t = (uint8_t*) kalloc(10, 1);
-
+    init_kernel_allocator();
+    uint8_t *b = (uint8_t*) kalloc(10);
+    init_pci_driver();
 
     virtio_gpu_driver gpu_driver;
     gpu_driver.init_2D_frame_buffer();

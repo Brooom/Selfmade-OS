@@ -1,13 +1,13 @@
-#include "std/args.h"
+#include "../std/args.h"
 #include "terminal.hpp"
-#include "allocator/allocator.h"
-#include "std/formating.h"
+#include "../kernel_allocator/kernel_allocator.h"
+#include "../std/formating.h"
 
 
 terminal::terminal(virtio_gpu_driver *gd)
 {
     gpu_driver = gd;
-    circular_buffer = (char (*)[40][MAX_TEXT_LENGTH]) kalloc(sizeof(char[40][MAX_TEXT_LENGTH]), 8);
+    circular_buffer = (char (*)[40][MAX_TEXT_LENGTH]) kalloc(sizeof(char[40][MAX_TEXT_LENGTH]));
     head = 0;
     tail = 0;
 }

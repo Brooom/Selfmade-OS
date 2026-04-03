@@ -1,5 +1,5 @@
 #include "formating.h"
-#include "../allocator/allocator.h"
+#include "../kernel_allocator/kernel_allocator.h"
 
 void format_string(const char * input, char *output, int max_output_size, va_list va_list)
 {

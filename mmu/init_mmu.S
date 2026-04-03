@@ -34,9 +34,9 @@
 
 
     .text
-    .global init_simple_mmu
+    .global init_mmu_first_step
 
-init_simple_mmu:
+init_mmu_first_step:
     ldr x1, =MAIR_CFG_macro
     ldr x2, =TCR_EL1_macro
     msr mair_el1, x1

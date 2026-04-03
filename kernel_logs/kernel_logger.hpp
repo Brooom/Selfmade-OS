@@ -6,8 +6,8 @@
 
 
 #include "virtio_gpu_driver/virtio_gpu_driver.hpp"
-#include "uart.h"
-#include "terminal.hpp"
+#include "../uart_driver/uart.h"
+#include "../terminal/terminal.hpp"
 #include "std/args.h"
 
 // When using this class make sure you dont introduce any circular dependencies.

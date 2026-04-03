@@ -1,10 +1,7 @@
-#include "allocator/allocator.h"
 #include <stdint.h>
 #include <stddef.h>
-#include "allocator.h"
+#include "page_allocator.h"
 #include "kernel_logs/kernel_logger_c_api.h"
-#include "init_simple_mmu.S"
-#include "simple_mmu.h"
 
 struct mem{
     struct mem *next;
@@ -18,8 +15,7 @@ struct mem *list_free = (struct mem *) kernel_heap_start;
 struct mem *list_alloc = NULL;
 int mem_size = sizeof(struct mem);
 
-void init_mmu(){
-    init_simple_mmu();
+void init_allocator(){
     *list_free = (struct mem){
         .next = NULL,
         .size = kernel_heap_end - kernel_heap_start-mem_size
@@ -44,7 +40,7 @@ void* kalloc(int size, int allignment){
         //remove from free list
         block_before->next = block->next;
         //address from where the memory of the given size is allocated
-        void *pointer = allign((void*) (block+1), allignment);
+        void *pointer = allign_addr((void*) (block+1), allignment);
         //add memory block to list of allocated elements
         block->next = list_alloc;
         list_alloc = block;
@@ -53,7 +49,7 @@ void* kalloc(int size, int allignment){
     else{
         block->size = block->size - (size+allignment-1+mem_size);
         struct mem *new_block = (struct mem *)((uint8_t *)(block + 1) + block->size);
-        void *pointer = allign((void*) (new_block+1), allignment);
+        void *pointer = allign_addr((void*) (new_block+1), allignment);
         new_block->next = list_alloc;
         new_block->size = size+allignment-1;
         list_alloc = new_block;
@@ -67,7 +63,7 @@ void kfree(void* pointer){
 }
 
 
-static void* allign(void *addr, int allignment)
+static void* allign_addr(void *addr, int allignment)
 {
     uintptr_t pointer = (uintptr_t) addr;
     pointer += allignment-1;

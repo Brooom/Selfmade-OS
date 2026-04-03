@@ -1,5 +1,5 @@
-#ifndef ALLOCATOR_H
-#define ALLOCATOR_H
+#ifndef KERNEL_ALLOCATOR_H
+#define KERNEL_ALLOCATOR_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -8,10 +8,10 @@ extern "C" {
 #include <stdint.h>
 #include <stddef.h>
 
-void init_mmu();
-void* kalloc(size_t size, int allignment);
+void init_kernel_allocator();
+void* kalloc(size_t size);
 void kfree(void* pointer);
-static void* allign(void *addr, int allignment);
+
 
 #ifdef __cplusplus
 } /* extern "C" */

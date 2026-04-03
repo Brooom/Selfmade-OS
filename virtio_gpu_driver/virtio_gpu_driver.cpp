@@ -1,6 +1,6 @@
 #include "virtio_gpu_driver.hpp"
 #include "kernel_logs/kernel_logger.hpp"
-#include "../allocator/allocator.h"
+#include "../kernel_allocator/kernel_allocator.h"
 #include "letters/font8x8_basic.h"
 
 struct virtio_pci_common_cfg {
@@ -178,7 +178,7 @@ virtio_gpu_driver::virtio_gpu_driver(){
     
     //start initalization
     kernel_logger::log("Address of device status %p", &common_cfg->device_status);
-    kernel_logger::log("Address of device status %p", 0xF & common_cfg->device_status);
+    kernel_logger::log("Address of device status %u", 0xF & common_cfg->device_status);
     common_cfg->device_status = 0;
     common_cfg->device_status |= 1;
     common_cfg->device_status |= 2;
@@ -220,9 +220,9 @@ virtio_gpu_driver::virtio_gpu_driver(){
     volatile struct virtq_avail *virtq_avail = virtq.avail;
     volatile struct virtq_desc *response = get_next_descriptor();
     volatile struct virtio_gpu_ctrl_hdr *b = 
-        (struct virtio_gpu_ctrl_hdr *) kalloc(sizeof(struct virtio_gpu_ctrl_hdr), 8);
+        (struct virtio_gpu_ctrl_hdr *) kalloc(sizeof(struct virtio_gpu_ctrl_hdr));
     struct virtio_gpu_resp_display_info *info = 
-        (struct virtio_gpu_resp_display_info *) kalloc(sizeof(struct virtio_gpu_resp_display_info), 8);
+        (struct virtio_gpu_resp_display_info *) kalloc(sizeof(struct virtio_gpu_resp_display_info));
     
     d->addr = (uint64_t) b;
     d->len = sizeof(*b);
@@ -268,24 +268,24 @@ virtio_gpu_driver::virtio_gpu_driver(){
     kernel_logger::log("x: %u", rec.x);
     kernel_logger::log("y: %u", rec.y);
     kernel_logger::log("width: %u", rec.width);
-    kernel_logger::log("height: ", rec.height);
+    kernel_logger::log("height: %u", rec.height);
 }
 
 struct virtq virtio_gpu_driver::construct_virtqueue(volatile struct virtio_pci_common_cfg *common_cfg){
     queue_size = common_cfg->queue_size;
 
     kernel_logger::log("descriptor: ");
-    uint8_t* addr_descriptor_table = (uint8_t*) kalloc(queue_size*16, 16);
+    uint8_t* addr_descriptor_table = (uint8_t*) kalloc(queue_size*16);
     common_cfg->queue_desc = (uint64_t) addr_descriptor_table;
 
 
     kernel_logger::log("driver area: ");
-    uint8_t* addr_driver = (uint8_t*) kalloc(queue_size*2+6, 2);
+    uint8_t* addr_driver = (uint8_t*) kalloc(queue_size*2+6);
     common_cfg->queue_driver = (uint64_t) addr_driver;
     
 
     kernel_logger::log("device area: ");
-    uint8_t* addr_device = (uint8_t*) kalloc(queue_size*8+6, 4);
+    uint8_t* addr_device = (uint8_t*) kalloc(queue_size*8+6);
     common_cfg->queue_device = (uint64_t) addr_device;
 
     struct virtq virtq;
@@ -307,10 +307,10 @@ void virtio_gpu_driver::init_2D_frame_buffer(){
     //Define gpu 2d resource
     volatile struct virtio_gpu_resource_create_2d  *gpu_2d_resource = 
         (struct virtio_gpu_resource_create_2d  *) 
-        kalloc(sizeof(struct virtio_gpu_resource_create_2d ), 8);
+        kalloc(sizeof(struct virtio_gpu_resource_create_2d ));
 
     volatile struct virtio_gpu_ctrl_hdr *response_gpu_2d_resource = 
-        (struct virtio_gpu_ctrl_hdr *) kalloc(sizeof(struct virtio_gpu_ctrl_hdr), 8);
+        (struct virtio_gpu_ctrl_hdr *) kalloc(sizeof(struct virtio_gpu_ctrl_hdr));
     
     gpu_2d_resource->hdr.type       = VIRTIO_GPU_CMD_RESOURCE_CREATE_2D;
     gpu_2d_resource->hdr.flags      = 0;
@@ -363,16 +363,16 @@ uint8_t* virtio_gpu_driver::connect_resource_to_memory(){
     //Define virtio_gpu_resource_attach_backing
     volatile struct virtio_gpu_resource_attach_backing  *resource_attach_backing  = 
         (struct virtio_gpu_resource_attach_backing  *) 
-        kalloc(sizeof(struct virtio_gpu_resource_attach_backing), 8);
+        kalloc(sizeof(struct virtio_gpu_resource_attach_backing));
 
     //Define virtio_gpu_mem_entry
     volatile struct virtio_gpu_mem_entry *mem_entry = 
         (struct virtio_gpu_mem_entry *) 
-        kalloc(sizeof(struct virtio_gpu_mem_entry), 8);
+        kalloc(sizeof(struct virtio_gpu_mem_entry));
 
     volatile struct virtio_gpu_ctrl_hdr *response = 
         (struct virtio_gpu_ctrl_hdr *) 
-        kalloc(sizeof(struct virtio_gpu_ctrl_hdr), 8);
+        kalloc(sizeof(struct virtio_gpu_ctrl_hdr));
     
     resource_attach_backing->hdr.type       = VIRTIO_GPU_CMD_RESOURCE_ATTACH_BACKING;
     resource_attach_backing->hdr.flags      = 0;
@@ -385,7 +385,7 @@ uint8_t* virtio_gpu_driver::connect_resource_to_memory(){
     d0->len      = sizeof(*resource_attach_backing);
     d0->flags    = VIRTQ_DESC_F_NEXT;
     d0->next     = d1_idx;
-    uint8_t *memory_2d = (uint8_t*) kalloc(800*1280*4, 8);
+    uint8_t *memory_2d = (uint8_t*) kalloc(800*1280*4);
     display = (pixelcolor *) memory_2d;
     mem_entry->addr     = (uint64_t) memory_2d;
     mem_entry->length   = 800*1280*4;
@@ -426,10 +426,10 @@ void virtio_gpu_driver::set_scanout_param(){
 
     volatile struct virtio_gpu_set_scanout *gpu_cmd_set_scan_out = 
         (struct virtio_gpu_set_scanout *) 
-        kalloc(sizeof(struct virtio_gpu_set_scanout ), 8);
+        kalloc(sizeof(struct virtio_gpu_set_scanout ));
 
     volatile struct virtio_gpu_ctrl_hdr *response = 
-        (struct virtio_gpu_ctrl_hdr *) kalloc(sizeof(struct virtio_gpu_ctrl_hdr), 8);
+        (struct virtio_gpu_ctrl_hdr *) kalloc(sizeof(struct virtio_gpu_ctrl_hdr));
     
     gpu_cmd_set_scan_out->hdr.type       = VIRTIO_GPU_CMD_SET_SCANOUT;
     gpu_cmd_set_scan_out->hdr.flags      = 0;
@@ -474,10 +474,10 @@ void virtio_gpu_driver::transfer_to_host_2d(){
 
     volatile struct virtio_gpu_transfer_to_host_2d *transfer_to_host_2d = 
         (struct virtio_gpu_transfer_to_host_2d *) 
-        kalloc(sizeof(struct virtio_gpu_transfer_to_host_2d), 8);
+        kalloc(sizeof(struct virtio_gpu_transfer_to_host_2d));
 
     volatile struct virtio_gpu_ctrl_hdr *response = 
-        (struct virtio_gpu_ctrl_hdr *) kalloc(sizeof(struct virtio_gpu_ctrl_hdr), 8);
+        (struct virtio_gpu_ctrl_hdr *) kalloc(sizeof(struct virtio_gpu_ctrl_hdr));
     
     transfer_to_host_2d->hdr.type       = VIRTIO_GPU_CMD_TRANSFER_TO_HOST_2D;
     transfer_to_host_2d->hdr.flags      = 0;
@@ -524,10 +524,10 @@ void virtio_gpu_driver::resource_flush(){
 
     volatile struct virtio_gpu_resource_flush *resource_flush = 
         (struct virtio_gpu_resource_flush *) 
-        kalloc(sizeof(struct virtio_gpu_resource_flush), 8);
+        kalloc(sizeof(struct virtio_gpu_resource_flush));
 
     volatile struct virtio_gpu_ctrl_hdr *response = 
-        (struct virtio_gpu_ctrl_hdr *) kalloc(sizeof(struct virtio_gpu_ctrl_hdr), 8);
+        (struct virtio_gpu_ctrl_hdr *) kalloc(sizeof(struct virtio_gpu_ctrl_hdr));
     
     resource_flush->hdr.type       = VIRTIO_GPU_CMD_RESOURCE_FLUSH;
     resource_flush->hdr.flags      = 0;
