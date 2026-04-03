@@ -58,9 +58,6 @@ $(BUILD_DIR)/formating.o: std/formating.c std/formating.h
 $(BUILD_DIR)/kernel_logger.o: kernel_logs/kernel_logger.cpp kernel_logs/kernel_logger.hpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/exceptions.o: exceptions/exceptions.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
 $(BUILD_DIR)/kernel.elf: linker.ld $(OBJ_FILES)
 	$(CC) $(LDFLAGS) $(OBJ_FILES) -o $@
 

@@ -60,9 +60,4 @@ extern "C" void kernel_main(void) {
     te.printf("test: %%", &d);
 
     kernel_logger::log("z");
-
-
-    kernel_logger::log("z");
-
-    
 }
