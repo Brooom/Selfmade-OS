@@ -1,6 +1,8 @@
-#include "pci_driver.h"
-#include "kernel_logs/kernel_logger_c_api.h"
 #include <stddef.h>
+
+#include "../kernel_logs/kernel_logger_c_api.h"
+#include "../mmu/mmu.h"
+#include "pci_driver.h"
 
 
 volatile uint8_t* ecam_ptr(const struct bus_device_function bdf, uint16_t off) {
@@ -11,6 +13,10 @@ volatile uint8_t* ecam_ptr(const struct bus_device_function bdf, uint16_t off) {
         ((uintptr_t)bdf.device_nr << 15) + 
         ((uintptr_t)bdf.function_nr << 12) + 
         off);
+}
+
+void init_pci_driver(){
+    register_device_memory(ECAM_BASE,  0x10000000);
 }
 
 struct bus_device_function search_pci_device(uint16_t device_id, uint16_t vendor_id, bool verbose){
@@ -157,6 +163,7 @@ uint64_t* alloc_bar_memory(struct bus_device_function bdf, uint8_t bar_index, bo
     if(memory_type == 1){
         if(address_length == 0){
             if(CPU_PCI_IO_BASE_ADDRESS+offset+bar_size < CPU_PCI_IO_BASE_ADDRESS+CPU_PCI_IO_SIZE){
+                register_device_memory(CPU_PCI_IO_BASE_ADDRESS+offset, bar_size);
                 BAR[bar_index] = (uint32_t) BUS_PCI_IO_BASE_ADDRESS+offset;
                 return (uint64_t*) CPU_PCI_IO_BASE_ADDRESS+offset;
             }
@@ -168,6 +175,7 @@ uint64_t* alloc_bar_memory(struct bus_device_function bdf, uint8_t bar_index, bo
     else if(memory_type == 2){
         if(address_length == 0){
             if(CPU_PCI_MEMORY_NON_PREFETCHABLE_BASE+offset+bar_size < CPU_PCI_MEMORY_NON_PREFETCHABLE_BASE+CPU_PCI_MEMORY_NON_PREFETCHABLE_SIZE){
+                register_device_memory(CPU_PCI_MEMORY_NON_PREFETCHABLE_BASE+offset, bar_size);
                 BAR[bar_index] = (uint32_t) BUS_PCI_MEMORY_NON_PREFETCHABLE_BASE+offset;
                 return (uint64_t*) CPU_PCI_MEMORY_NON_PREFETCHABLE_BASE+offset;
             }
@@ -179,7 +187,7 @@ uint64_t* alloc_bar_memory(struct bus_device_function bdf, uint8_t bar_index, bo
     else if(memory_type == 3){
         if(address_length == 2){
             if(CPU_PCI_MEMORY_PREFETCHABLE_BASE+offset+bar_size < CPU_PCI_MEMORY_PREFETCHABLE_BASE+CPU_PCI_MEMORY_PREFETCHABLE_SIZE){
-
+                register_device_memory(CPU_PCI_MEMORY_PREFETCHABLE_BASE+offset, bar_size);
                 uint64_t v = (uint64_t) CPU_PCI_MEMORY_PREFETCHABLE_BASE+offset;
                 BAR[0] = (uint32_t) v;
                 BAR[1] = (uint32_t) (v>>32);

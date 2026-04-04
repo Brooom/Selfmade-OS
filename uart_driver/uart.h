@@ -11,7 +11,7 @@ extern "C" {
 #include "std/formating.h"
 
 
-
+void init_uart();
 void uart_send(const char *string, int string_length, ...);
 /**
  * @brief Write string over uart

@@ -31,6 +31,11 @@ struct virtio_pci_cap{
     uint32_t length; /* Length of the structure, in bytes. */ 
 };
 
+/**Initalize PCI driver.
+ * - map the used device memory
+ */
+void init_pci_driver();
+
 /** Gives the pointer to an Configuration Space Header element*/
 volatile uint8_t* ecam_ptr(const struct bus_device_function bdf, uint16_t off);
 
