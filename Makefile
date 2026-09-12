@@ -64,5 +64,8 @@ $(BUILD_DIR)/kernel.elf: linker.ld $(OBJ_FILES)
 $(BUILD_DIR)/kernel.img: $(BUILD_DIR)/kernel.elf
 	$(OBJCOPY) -O binary $< $@
 
+$(BUILD_DIR)/exceptions.o: exceptions/exceptions.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
 clean:
 	rm -rf $(BUILD_DIR)
