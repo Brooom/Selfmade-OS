@@ -1,4 +1,5 @@
 .section .vectors, "ax"
+//Exception vector table
 vector_table:
     b sync_exception_current_EL_using_SPEL0  
     .balign 0x80
