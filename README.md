@@ -26,7 +26,7 @@ Selfmade OS is a personal 64-bit bare-metal kernel project. It currently targets
 - [ ] Raspberry Pi platform support
 
 ## Build
-Prerequisites: `aarch64-elf-gcc`, `aarch64-elf-g++`, `make`, and `qemu-system-aarch64`.
+Prerequisites: `aarch64-elf-gcc`, `aarch64-elf-g++`, `make`, and `qemu-system-aarch64 10.2.0`.
 
 ```sh
 make
