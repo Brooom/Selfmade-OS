@@ -59,9 +59,6 @@ In terminal 2:
 ```
 Starts gdb for debugging.
 
-## Toward Raspberry Pi
-- Swap the current VirtIO-GPU and PCI paths with Raspberry Pi MMIO peripherals (framebuffer/UART/interrupts).
-- Flesh out memory management and higher-level services once the hardware bring-up is stable.
 
 ## File overview
 
