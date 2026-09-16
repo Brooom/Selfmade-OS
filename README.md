@@ -24,6 +24,7 @@ Selfmade OS is a personal 64-bit bare-metal kernel project. It currently targets
 - [ ] Process scheduling
 - [ ] Buddy allocator
 - [ ] Raspberry Pi platform support
+- [ ] Interrupt based UART or DMA UART
 
 ## Build
 Prerequisites: `aarch64-elf-gcc`, `aarch64-elf-g++`, `make`, and `qemu-system-aarch64 10.2.0`.
