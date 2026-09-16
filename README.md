@@ -100,3 +100,16 @@ Files marked as **not built** are present in the repository but are not listed i
 | `virtio_gpu_driver/letters/notice.md` | Records the bitmap font's source, revision, and public-domain license. |
 | `virtio_gpu_driver/virtio_gpu_driver.cpp` | Implements VirtIO-GPU PCI initialization, virtqueue commands, framebuffer setup, scanout updates, and basic pixel, shape, character, and text drawing. |
 | `virtio_gpu_driver/virtio_gpu_driver.hpp` | Declares VirtIO queue and graphics data structures and the public `virtio_gpu_driver` class. |
+
+
+# Documentation
+The chapter gives some links that lead to the documentation of different part of the setup I use.
+
+[Qemu virt board specifications](https://qemu.weilnetz.de/doc/5.2/system/arm/virt.html)
+
+[GIC Overview]()
+
+[GIC Architecture](https://support.arm.com/documentation/ihi0069/latest/?utm_source=chatgpt.com)
+
+# AI disclaimer
+My primary goal with this project is to learn as much as possible. I use AI only as a supporting tool to understand concepts, discuss ideas, and help diagnose bugs. I do not use AI to generate code for the project.
