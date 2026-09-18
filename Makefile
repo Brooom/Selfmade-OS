@@ -13,7 +13,7 @@ BUILD_DIR = ./build
 
 OBJS = boot.o kernel.o uart.o page_allocator.o virtio_gpu_driver.o \
        pci_driver.o terminal.o formating.o kernel_logger.o exceptions.o \
-	   init_mmu.o mmu.o kernel_allocator.o
+	   init_mmu.o mmu.o kernel_allocator.o gic.o
 
 OBJ_FILES := $(addprefix $(BUILD_DIR)/,$(OBJS))
 
@@ -57,15 +57,18 @@ $(BUILD_DIR)/formating.o: std/formating.c std/formating.h
 
 $(BUILD_DIR)/kernel_logger.o: kernel_logs/kernel_logger.cpp kernel_logs/kernel_logger.hpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
+	
+$(BUILD_DIR)/exceptions.o: exceptions/exceptions.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/gic.o: interrupt/gic.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/kernel.elf: linker.ld $(OBJ_FILES)
 	$(CC) $(LDFLAGS) $(OBJ_FILES) -o $@
 
 $(BUILD_DIR)/kernel.img: $(BUILD_DIR)/kernel.elf
 	$(OBJCOPY) -O binary $< $@
-
-$(BUILD_DIR)/exceptions.o: exceptions/exceptions.c
-	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
 	rm -rf $(BUILD_DIR)
