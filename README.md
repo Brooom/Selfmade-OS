@@ -108,7 +108,9 @@ The chapter gives some links that lead to the documentation of different part of
 
 [Qemu virt board specifications](https://qemu.weilnetz.de/doc/5.2/system/arm/virt.html)
 
-[GIC Overview]()
+[Device Tree Specifications](https://github.com/torvalds/linux/tree/master/Documentation/devicetree/bindings)
+
+[GIC Overview](https://developer.arm.com/architectures/system-architectures/system-components/arm-generic-interrupt-controller/documentation)
 
 [GIC Architecture](https://support.arm.com/documentation/ihi0069/latest/?utm_source=chatgpt.com)
 
