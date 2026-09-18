@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 FILE="$TMPDIR/out-$(date +%Y%m%d-%H%M%S).txt"
 qemu-system-aarch64 \
-    -M virt \
+    -M virt,gic-version=3\
+    -gic-version 3 \
     -cpu cortex-a53 \
     -device virtio-gpu-pci \
     -m 256M \
