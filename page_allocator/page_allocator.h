@@ -8,6 +8,12 @@ extern "C" {
 #include <stdint.h>
 #include <stddef.h>
 
+/**
+ * @file page_allocator.h
+ *
+ * This allocator guarantees that no memory is allocated multiple times. It does not map the memory. The mapping is done by the kernel allocator.
+ */
+
 void init_allocator();
 void* palloc(size_t size);
 void pfree(void* pointer);
