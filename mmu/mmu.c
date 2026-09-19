@@ -321,7 +321,8 @@ void map_addr(uintptr_t address, uint64_t size){
  *         and link into a page-table hierarchy.
  */
 static uint64_t* map_page_for_pagetable(){
-    //TODO: Currently I just allocate 4 pages eventhough the higher level page tables are not needed. This has to be optimized in the future. A possible solution would be to just release the unused pages again
+    // Clear the new table once mapped: reused RAM can contain old valid entries.
+    //TODO: Currently I just allocate 4 pages eventhough the higher level page tables are not needed. This has to be optimized in the future. A possible solution would be to just release the unused pages again.
     uintptr_t continueous_block = (uintptr_t)palloc_continuous_block(4);
     struct map_new_page_tables new_page_tables = {(uint64_t*)continueous_block, (uint64_t*)(continueous_block+3*PAGESIZE), (uint64_t*)(continueous_block+2*PAGESIZE), (uint64_t*)(continueous_block+PAGESIZE)};
     uint64_t l0_index = ((uint64_t) new_page_tables.new_pagetable >> BLOCK_SIZE_SHIFT_L0) & 0x1FF; 
@@ -335,6 +336,7 @@ static uint64_t* map_page_for_pagetable(){
         zero_out_page(tmp_l1_table);
         zero_out_page(tmp_l2_table);
         zero_out_page(tmp_l3_table);
+        zero_out_page(new_page_tables.new_pagetable);
         return new_page_tables.new_pagetable;
     }
     uintptr_t l1_phy_addr = l0_table[l0_index] & 0x0000FFFFFFFFF000ULL;
@@ -345,6 +347,7 @@ static uint64_t* map_page_for_pagetable(){
         l1_table[l1_index] = (uint64_t)l2_table | PAGETABLEATTRIBUTES;
         zero_out_page(tmp_l1_table);
         zero_out_page(tmp_l2_table);
+        zero_out_page(new_page_tables.new_pagetable);
         return new_page_tables.new_pagetable;
     }
     uintptr_t l2_phy_addr = l1_table[l1_index] & 0x0000FFFFFFFFF000ULL;
@@ -354,12 +357,14 @@ static uint64_t* map_page_for_pagetable(){
         uintptr_t l3_table = virt_to_phys((uint64_t*) new_page_tables.new_l3_pagetable);
         l2_table[l2_index] = (uint64_t)l3_table | PAGETABLEATTRIBUTES;
         zero_out_page(tmp_l1_table);
+        zero_out_page(new_page_tables.new_pagetable);
         return new_page_tables.new_pagetable;
     }
     uintptr_t l3_phy_addr = l2_table[l2_index] & 0x0000FFFFFFFFF000ULL;
     uint64_t* l3_table = phys_to_virt(l3_phy_addr);
     if(!(l3_table[l3_index] & 1)){
         l3_table[l3_index] = PAGEATTRIBUTESFORNORMALMEMORY | virt_to_phys(new_page_tables.new_pagetable);
+        zero_out_page(new_page_tables.new_pagetable);
         return new_page_tables.new_pagetable;
     }
     
