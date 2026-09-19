@@ -9,6 +9,12 @@ extern "C" {
 #include <stddef.h>
 
 void init_kernel_allocator();
+
+/**
+ * @brief Allocate and map memory
+ * 
+ * Calls the page allocator to get a range of free addresses and calls the mmu to also map this addresses if not already mapped.
+ */
 void* kalloc(size_t size);
 void kfree(void* pointer);
 
