@@ -312,7 +312,13 @@ void map_addr(uintptr_t address, uint64_t size){
 }
 
 /**
+ * If all mapped pages are allocated there is no page left that can be used for a new pagetable. This function uses temporary page tables to map new pages for new page tables.
  * 
+ * @pre The root and temporary tables are initialized. The allocated block
+ *      must lie entirely within one page region so all four pages share
+ *      L0/L1/L2 indices, and the requested page must not already be mapped.
+ * @return Pointer to the mapped, zeroed page, ready for the caller to populate
+ *         and link into a page-table hierarchy.
  */
 static uint64_t* map_page_for_pagetable(){
     //TODO: Currently I just allocate 4 pages eventhough the higher level page tables are not needed. This has to be optimized in the future. A possible solution would be to just release the unused pages again
