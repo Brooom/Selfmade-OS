@@ -21,8 +21,8 @@ void* palloc(size_t size){
     current_free += alligned_size;
     return start_add;
 }
-/** Returns a block of memory that is coninous and in the l3 pagetable.
- * This function is needed for page table allocation.
+/** Returns a block of memory that is continuous and in the l3 pagetable.
+ * This function is needed for page table allocation, since we require the page tables to be part of the same page.
  * 
 */
 void* palloc_continuous_block(size_t nr_of_pages){
@@ -32,7 +32,7 @@ void* palloc_continuous_block(size_t nr_of_pages){
     
     
     if(nr_of_pages>4096){
-        kernel_logger_log("Error: A continous block in the same l3 pagetable can not be bigger than 4096.");
+        kernel_logger_log("Error: A continuous block in the same l3 pagetable can not be bigger than 4096.");
     }
     else if(pages_left >= nr_of_pages){
         current_free += nr_of_pages*4096;
