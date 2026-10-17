@@ -16,6 +16,7 @@ class kernel_logger{
         void vlog(const char *fmt, va_list args, bool send_terminal = true);
         static void init_terminal(terminal *terminal);
         static void log(const char *fmt, ...); 
+        static void log_no_terminal(const char *fmt, ...);
         static kernel_logger& get_logger();
     
     private:

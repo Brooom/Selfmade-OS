@@ -26,6 +26,14 @@ void kernel_logger::log(const char *fmt, ...)
     va_end(args);
 }
 
+void kernel_logger::log_no_terminal(const char *fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    klogger.vlog(fmt, args, false);
+    va_end(args);
+}
+
 kernel_logger &kernel_logger::get_logger()
 {
     return klogger;
