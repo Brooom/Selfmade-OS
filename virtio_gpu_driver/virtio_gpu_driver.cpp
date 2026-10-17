@@ -593,7 +593,7 @@ void virtio_gpu_driver::draw_letter(int x, int y, char l, struct pixelcolor c, i
 }
 
 void virtio_gpu_driver::draw_text(int x, int y, const char *string, int string_size, struct pixelcolor c, int text_size){
-    for(int i = 0; i<string_size; ++i){
+    for(int i = 0; i<string_size && string[i] != '\0'; ++i){
         draw_letter(x+i*text_size*8, y, string[i], c, text_size);
     }
 }
