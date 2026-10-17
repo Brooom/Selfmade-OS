@@ -14,6 +14,7 @@ extern char tmp_page_3[];
 extern void init_mmu_first_step(void);
 
 static int verbose = 0;
+static int debug = 1;
 static uint64_t *l0_table;
 static uint64_t *tmp_l1_table;
 static uint64_t *tmp_l2_table;
@@ -35,6 +36,7 @@ static void mmu_map_4kb(uint64_t* root_pagetable, uint64_t va, uint64_t pa, uint
 //void mmu_map_1gb(uint64_t* root_pagetable, uint64_t va, uint64_t pa, uint8_t attr_idx);
 //void mmu_map_2mb(uint64_t* root_pagetable, uint64_t va, uint64_t pa, uint8_t attr_idx);
 
+static inline void debug_flush_tlb(void);
 /**Initialize root of translation table*/
 void init_mmu(){
     init_mmu_first_step();
@@ -232,7 +234,7 @@ static void mmu_map_4kb(uint64_t* root_pagetable, uintptr_t va, uintptr_t pa, ui
         if(verbose){
             kernel_logger_log_no_terminal("There is no initialized page table at index l2: %u", l2_index);
         }
-        l2[l2_index] = (int64_t) map_page_for_pagetable() | PAGETABLEATTRIBUTES;
+        if(debug)debug_flush_tlb();
         if(verbose){
             kernel_logger_log_no_terminal("Map page table l3.");
         }
@@ -330,6 +332,7 @@ static uint64_t* map_page_for_pagetable(){
     uint64_t l2_index = ((uint64_t) new_page_tables.new_pagetable >> BLOCK_SIZE_SHIFT_L2) & 0x1FF;
     uint64_t l3_index = ((uint64_t) new_page_tables.new_pagetable >> BLOCK_SIZE_SHIFT_L3) & 0x1FF;
     if(!(l0_table[l0_index] & 1)){
+        if(debug)debug_flush_tlb();
         map_page_for_table_h(l0_table, new_page_tables, 1);
         uintptr_t l1_table = virt_to_phys((uint64_t*) new_page_tables.new_l1_pagetable);
         l0_table[l0_index] = (uint64_t)l1_table | PAGETABLEATTRIBUTES;
@@ -345,19 +348,22 @@ static uint64_t* map_page_for_pagetable(){
         map_page_for_table_h(l1_table, new_page_tables, 2);
         uintptr_t l2_table = virt_to_phys((uint64_t*) new_page_tables.new_l2_pagetable);
         l1_table[l1_index] = (uint64_t)l2_table | PAGETABLEATTRIBUTES;
-        zero_out_page(tmp_l1_table);
         zero_out_page(tmp_l2_table);
         zero_out_page(new_page_tables.new_pagetable);
+        if(debug)debug_flush_tlb();
         return new_page_tables.new_pagetable;
     }
     uintptr_t l2_phy_addr = l1_table[l1_index] & 0x0000FFFFFFFFF000ULL;
     uint64_t* l2_table = phys_to_virt(l2_phy_addr);
     if(!(l2_table[l2_index] & 1)){
         map_page_for_table_h(l2_table, new_page_tables, 3);
+
         uintptr_t l3_table = virt_to_phys((uint64_t*) new_page_tables.new_l3_pagetable);
         l2_table[l2_index] = (uint64_t)l3_table | PAGETABLEATTRIBUTES;
-        zero_out_page(tmp_l1_table);
+        
+        zero_out_page(tmp_l3_table);
         zero_out_page(new_page_tables.new_pagetable);
+        if(debug)debug_flush_tlb();
         return new_page_tables.new_pagetable;
     }
     uintptr_t l3_phy_addr = l2_table[l2_index] & 0x0000FFFFFFFFF000ULL;
@@ -365,6 +371,7 @@ static uint64_t* map_page_for_pagetable(){
     if(!(l3_table[l3_index] & 1)){
         l3_table[l3_index] = PAGEATTRIBUTESFORNORMALMEMORY | virt_to_phys(new_page_tables.new_pagetable);
         zero_out_page(new_page_tables.new_pagetable);
+        if(debug)debug_flush_tlb();
         return new_page_tables.new_pagetable;
     }
     
@@ -538,3 +545,15 @@ TODO
 Clear page table entries
 Recursive page table mapping
 */
+
+/** Synchronize page-table writes and invalidate cached EL1/EL0 translations. This is only used for debugging.*/
+static inline void debug_flush_tlb(void)
+{
+    asm volatile(
+        "dsb ishst\n"       // Complete previous page-table writes
+        "tlbi vmalle1is\n"  // Invalidate EL1/EL0 cached translations
+        "dsb ish\n"         // Wait for invalidation to complete
+        "isb\n"
+        ::: "memory"
+    );
+}
