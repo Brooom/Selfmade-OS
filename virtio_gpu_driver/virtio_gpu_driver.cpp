@@ -507,7 +507,7 @@ void virtio_gpu_driver::transfer_to_host_2d(){
     *queue_notify_address = 0;
     while(virtq_used->idx == used_idx){};
     if(response->type != VIRTIO_GPU_RESP_OK_NODATA){
-        kernel_logger::log("Wrong return typ for transfer: %x", false ,response->type);
+        kernel_logger::log_no_terminal("Wrong return typ for transfer: %x", response->type, false);
     }
     else{
         //kernel_logger::log("Transfer to host worked.", false);
