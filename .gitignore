@@ -4,3 +4,4 @@
 *.dtb
 *.dts
 .vscode
+debug*
