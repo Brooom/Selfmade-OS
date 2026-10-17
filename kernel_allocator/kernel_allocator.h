@@ -9,6 +9,7 @@ extern "C" {
 #include <stddef.h>
 
 void init_kernel_allocator();
+void init_kernel_allocator_verbose();
 
 /**
  * @brief Allocate and map memory

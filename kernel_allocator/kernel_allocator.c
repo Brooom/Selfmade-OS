@@ -13,6 +13,11 @@ void init_kernel_allocator(){
     init_mmu();
 }
 
+void init_kernel_allocator_verbose(){
+    mmu_verbose(1);
+    init_mmu();
+}
+
 void* kalloc(size_t size){
     uint64_t alligned_size = allign(size);
     void *adr = palloc(alligned_size);
@@ -25,7 +30,7 @@ void* kalloc(size_t size){
 }
 
 void kfree(void* pointer){
-
+    
 }
 
 static void* allign_addr(void *addr, int allignment)
