@@ -101,32 +101,32 @@ void init_mmu(){
         if(verbose){
             kernel_logger_log("There is no an initialized page table at index l0: %u", l0_index);
         }
-        uintptr_t l1 = (uintptr_t)palloc(PAGESIZE);
-        uintptr_t l1_table = virt_to_phys((uint64_t*)l1);
+        uintptr_t l1_table = (uintptr_t)palloc(PAGESIZE);
+        uintptr_t l1_table = virt_to_phys((uint64_t*)l1_table);
         root_pagetable[l0_index] = (uint64_t)l1_table | PAGETABLEATTRIBUTES;
         if(verbose){
             kernel_logger_log("Map page table l1.");
         }
-        mmu_map_4kb(root_pagetable, l1, l1, 0);
+        mmu_map_4kb(root_pagetable, l1_table, l1_table, 0);
         
     }
     uintptr_t l1_phy_addr = root_pagetable[l0_index] & 0x0000FFFFFFFFF000ULL;
-    uint64_t* l1 = phys_to_virt(l1_phy_addr);
+    uint64_t* l1_table = phys_to_virt(l1_phy_addr);
 
-    if(!(l1[l1_index] & 1)){
+    if(!(l1_table[l1_index] & 1)){
         if(verbose){
             kernel_logger_log("There is no initialized page table at index l1: %u", l1_index);
         }
         if(attr_idx==0){
             uintptr_t block = BLOCKATTRIBUTESFORNORMALMEMORY | pa;
-            l1[l1_index] = (uint64_t)block;
+            l1_table[l1_index] = (uint64_t)block;
             if(verbose){
                 kernel_logger_log("Created block at idx0: %u, idx1: %u", l0_index, l1_index);
             }
         }
         else if(attr_idx == 1){
             uintptr_t block = BLOCKATTRIBUTESFORDEVICEMEMORY | pa;
-            l1[l1_index] = (uint64_t)block;
+            l1_table[l1_index] = (uint64_t)block;
             if(verbose){
                 kernel_logger_log("Created block at idx0: %u, idx1: %u", l0_index, l1_index);
             }
@@ -148,46 +148,46 @@ void init_mmu(){
         if(verbose){
             kernel_logger_log("There is no an initialized page table at index l0: %u", l0_index);
         }
-        uintptr_t l1 = (uintptr_t)palloc(PAGESIZE);
-        uintptr_t l1_table = virt_to_phys((uint64_t*)l1);
+        uintptr_t l1_table = (uintptr_t)palloc(PAGESIZE);
+        uintptr_t l1_table = virt_to_phys((uint64_t*)l1_table);
         root_pagetable[l0_index] = (uint64_t)l1_table | PAGETABLEATTRIBUTES;
         if(verbose){
             kernel_logger_log("Map page table l1.");
         }
-        mmu_map_4kb(root_pagetable, l1, l1, 0);
+        mmu_map_4kb(root_pagetable, l1_table, l1_table, 0);
     }
     uintptr_t l1_phy_addr = root_pagetable[l0_index] & 0x0000FFFFFFFFF000ULL;
-    uint64_t* l1 = phys_to_virt(l1_phy_addr);
+    uint64_t* l1_table = phys_to_virt(l1_phy_addr);
 
-    if(!(l1[l1_index] & 1)){
+    if(!(l1_table[l1_index] & 1)){
         if(verbose){
             kernel_logger_log("There is no initialized page table at index l1: %u", l1_index);
         }
-        uintptr_t l2 = (uintptr_t)palloc(PAGESIZE);
-        uintptr_t l2_table = virt_to_phys((uint64_t*)l2);
-        l1[l1_index] = (uint64_t)l2_table | PAGETABLEATTRIBUTES;
+        uintptr_t l2_table = (uintptr_t)palloc(PAGESIZE);
+        uintptr_t l2_table = virt_to_phys((uint64_t*)l2_table);
+        l1_table[l1_index] = (uint64_t)l2_table | PAGETABLEATTRIBUTES;
         if(verbose){
             kernel_logger_log("Map page table l2.");
         }
-        mmu_map_4kb(root_pagetable, l2, l2, 0);
+        mmu_map_4kb(root_pagetable, l2_table, l2_table, 0);
     }
-    uintptr_t l2_phy_addr = l1[l1_index] & 0x0000FFFFFFFFF000ULL;
-    uint64_t* l2 = phys_to_virt(l2_phy_addr);
+    uintptr_t l2_phy_addr = l1_table[l1_index] & 0x0000FFFFFFFFF000ULL;
+    uint64_t* l2_table = phys_to_virt(l2_phy_addr);
 
-    if(!(l2[l2_index] & 1)){
+    if(!(l2_table[l2_index] & 1)){
         if(verbose){
             kernel_logger_log("There is no initialized page table at index l2: %u", l2_index);
         }
         if(attr_idx==0){
             uintptr_t block = BLOCKATTRIBUTESFORNORMALMEMORY | pa;
-            l2[l2_index] = (uint64_t)block;
+            l2_table[l2_index] = (uint64_t)block;
             if(verbose){
                 kernel_logger_log("Created block at idx0: %u, idx1: %u, idx2: %u", l0_index, l1_index, l2_index);
             }
         }
         else if(attr_idx == 1){
             uint64_t block = BLOCKATTRIBUTESFORDEVICEMEMORY | pa;
-            l2[l2_index] = (uint64_t)block;
+            l2_table[l2_index] = (uint64_t)block;
             if(verbose){
                 kernel_logger_log("Created block at idx0: %u, idx1: %u, idx2: %u", l0_index, l1_index, l2_index);
             }
@@ -213,22 +213,22 @@ static void mmu_map_4kb(uint64_t* root_pagetable, uintptr_t va, uintptr_t pa, ui
         root_pagetable[l0_index] = (int64_t) map_page_for_pagetable() | PAGETABLEATTRIBUTES;
     }
     uintptr_t l1_phy_addr = root_pagetable[l0_index] & 0x0000FFFFFFFFF000ULL;
-    uint64_t* l1 = phys_to_virt(l1_phy_addr);
+    uint64_t* l1_table = phys_to_virt(l1_phy_addr);
 
-    if(!(l1[l1_index] & 1)){
+    if(!(l1_table[l1_index] & 1)){
         if(verbose){
-            kernel_logger_log_no_terminal(0, "There is no initialized page table at index l1:%u", l1_index);
+            kernel_logger_log_no_terminal("There is no initialized page table at index l1:%u", l1_index);
         }
         uint16_t t = 1;
-        l1[l1_index] = (int64_t) map_page_for_pagetable() | PAGETABLEATTRIBUTES;
+        l1_table[l1_index] = (int64_t) map_page_for_pagetable() | PAGETABLEATTRIBUTES;
         if(verbose){
-            kernel_logger_log_no_terminal("Map page table l2.");
+            kernel_logger_log_no_terminal("- Map page table l2.");
         }
     }
-    uintptr_t l2_phy_addr = l1[l1_index] & 0x0000FFFFFFFFF000ULL;
-    uint64_t* l2 = phys_to_virt(l2_phy_addr);
+    uintptr_t l2_phy_addr = l1_table[l1_index] & 0x0000FFFFFFFFF000ULL;
+    uint64_t* l2_table = phys_to_virt(l2_phy_addr);
 
-    if(!(l2[l2_index] & 1)){
+    if(!(l2_table[l2_index] & 1)){
         if(verbose){
             kernel_logger_log_no_terminal("There is no initialized page table at index l2: %u", l2_index);
         }
@@ -237,25 +237,25 @@ static void mmu_map_4kb(uint64_t* root_pagetable, uintptr_t va, uintptr_t pa, ui
             kernel_logger_log_no_terminal("Map page table l3.");
         }
     }
-    uintptr_t l3_phy_addr = l2[l2_index] & 0x0000FFFFFFFFF000ULL;
-    uint64_t* l3 = phys_to_virt(l3_phy_addr);
+    uintptr_t l3_phy_addr = l2_table[l2_index] & 0x0000FFFFFFFFF000ULL;
+    uint64_t* l3_table = phys_to_virt(l3_phy_addr);
 
-    if(!(l3[l3_index] & 1)){
+    if(!(l3_table[l3_index] & 1)){
         if(verbose){
             kernel_logger_log_no_terminal("There is no initialized page at index l3: %u", l3_index);
         }
         if(attr_idx==0){
             uintptr_t block = PAGEATTRIBUTESFORNORMALMEMORY | pa;
-            l3[l3_index] = (uint64_t)block;
+            l3_table[l3_index] = (uint64_t)block;
             if(verbose){
-                kernel_logger_log_no_terminal("Created page at idx0: %u, idx1: %u, idx2: %u, idx3: %u", l0_index, l1_index, l2_index, l3_index);
+                kernel_logger_log_no_terminal("- Created page at idx0: %u, idx1: %u, idx2: %u, idx3: %u", l0_index, l1_index, l2_index, l3_index);
             }
         }
         else if(attr_idx == 1){
             uint64_t block = PAGEATTRIBUTESFORDEVICEMEMORY | pa;
-            l3[l3_index] = (uint64_t)block;
+            l3_table[l3_index] = (uint64_t)block;
             if(verbose){
-                kernel_logger_log_no_terminal("Created page at idx0: %u, idx1: %u, idx2: %u, idx3: %u", l0_index, l1_index, l2_index, l3_index);
+                kernel_logger_log_no_terminal("- Created page at idx0: %u, idx1: %u, idx2: %u, idx3: %u", l0_index, l1_index, l2_index, l3_index);
             }
         }
         else{
