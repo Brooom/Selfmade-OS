@@ -13,7 +13,7 @@ extern char tmp_page_2[];
 extern char tmp_page_3[];
 extern void init_mmu_first_step(void);
 
-static int verbose;
+static int verbose = 0;
 static uint64_t *l0_table;
 static uint64_t *tmp_l1_table;
 static uint64_t *tmp_l2_table;
