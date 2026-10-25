@@ -28,8 +28,7 @@ void* palloc(size_t size){
 void* palloc_continuous_block(size_t nr_of_pages){
     current_free = (uint8_t*) allign_addr(current_free, PAGESIZE);
     uint8_t *start_add = current_free;
-    size_t pages_left = (BLOCK_SIZE_L2 - ((uintptr_t)current_free & (BLOCK_SIZE_L2 - 1)));
-    
+    size_t pages_left = (BLOCK_SIZE_L2 - ((uintptr_t)current_free & (BLOCK_SIZE_L2 - 1)))/PAGESIZE;
     
     if(nr_of_pages>4096){
         kernel_logger_log("Error: A continuous block in the same l3 pagetable can not be bigger than 4096.");
