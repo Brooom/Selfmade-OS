@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 FILE="$TMPDIR/out-$(date +%Y%m%d-%H%M%S).txt"
+# Add ,dumpdtb=build/virt.dtb to the machine option to generate a device tree blob.
 qemu-system-aarch64 \
-    -M virt,gic-version=3\ #-M virt,gic-version=3,dumpdtb=build/virt.dtb  generates device tree blob
+    -M virt,gic-version=3 \
     -cpu cortex-a53 \
     -device virtio-gpu-pci \
     -m 256M \

@@ -1,10 +1,10 @@
 #include "kernel_logs/kernel_logger.hpp"
-#include "kernel_logs/kernel_logger.hpp"
 #include "pci_driver/pci_driver.h"
 #include "virtio_gpu_driver/virtio_gpu_driver.hpp"
 #include "kernel_allocator/kernel_allocator.h"
 #include "terminal/terminal.hpp"
 #include "uart_driver/uart.h"
+#include "interrupt/gic.h"
 
 extern "C" void kernel_main(void) {
     kernel_logger::log("Start kernel: %s %s", __DATE__, __TIME__);
@@ -54,10 +54,12 @@ extern "C" void kernel_main(void) {
     
     }
     int d = 16;
-    
+
     te.printf("int size %u", sizeof(int));
     te.printf("%x", 16);
     te.printf("test: %%", &d);
 
     kernel_logger::log("z");
+    config_GICD_CTLR();
+    kernel_logger::log("End");
 }
