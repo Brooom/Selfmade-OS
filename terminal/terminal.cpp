@@ -2,6 +2,7 @@
 #include "terminal.hpp"
 #include "../kernel_allocator/kernel_allocator.h"
 #include "../std/formating.h"
+#include "../kernel_logs/kernel_logger.hpp"
 
 
 terminal::terminal(virtio_gpu_driver *gd)
@@ -20,15 +21,10 @@ void terminal::printf(const char *fom, ...)
     format_string(fom, (*circular_buffer)[head], MAX_TEXT_LENGTH, args);
     va_end(args);
     head=(head+1)%40;
-    if(((head - tail)%40) > 20){
-        if(((head - tail)%40) > 21){
-            //eror message
-        }
-        else{
-            tail = (tail + 1) % 20;
-        }
+    if((((head - tail) % 40) + 40) % 40 > 20){
+        tail = (tail + 1) % 40;
     }
-    for(int i = 0; i<(head - tail)%40; i++){
+    for(int i = 0; i<(((head - tail) % 40) + 40) % 40; i++){ // This is needed since C does not mathematically correct calculate modulo
         gpu_driver->draw_text(
             0, 
             i*4*8, 
